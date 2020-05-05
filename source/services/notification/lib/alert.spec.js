@@ -7,7 +7,8 @@ const test = sinonTest(sinon);
 let AWS = require('aws-sdk-mock');
 let Alert = require('./alert.js');
 
-describe('Alert', function() {
+// Update for fans
+describe('Alert', function () {
   let _event = {
     createdAt: '2018-02-06T20:57:48Z',
     deviceId: '42adad4d-fdd1-4db0-a501-61cffd0fa3e4',
@@ -38,7 +39,7 @@ describe('Alert', function() {
   };
 
   const _cognitoUserAttributes = [
-    {Name: 'phone_number', Value: '+11230000111'},
+    { Name: 'phone_number', Value: '+11230000111' },
   ];
 
   const _registrationItem = {
@@ -47,24 +48,24 @@ describe('Alert', function() {
     status: 'complete'
   };
 
-  afterEach(function() {
+  afterEach(function () {
     AWS.restore();
   });
 
   it(
     'should return succes when alert sent for warning event',
-    test(async function() {
+    test(async function () {
       AWS.mock('SNS', 'publish', Promise.resolve());
-      AWS.mock('DynamoDB.DocumentClient', 'query', function(params, callback) {
-        callback(null, {Items: [_registrationItem]});
+      AWS.mock('DynamoDB.DocumentClient', 'query', function (params, callback) {
+        callback(null, { Items: [_registrationItem] });
       });
-      AWS.mock('DynamoDB.DocumentClient', 'get', function(params, callback) {
-        callback(null, {Item: _userSettingItem});
+      AWS.mock('DynamoDB.DocumentClient', 'get', function (params, callback) {
+        callback(null, { Item: _userSettingItem });
       });
       AWS.mock(
         'CognitoIdentityServiceProvider',
         'listUsers',
-        Promise.resolve({Users: [{Attributes: _cognitoUserAttributes}]})
+        Promise.resolve({ Users: [{ Attributes: _cognitoUserAttributes }] })
       );
       const _a = new Alert();
 
@@ -82,9 +83,9 @@ describe('Alert', function() {
 
   it(
     'should return error information when device registration not found',
-    test(async function() {
-      AWS.mock('DynamoDB.DocumentClient', 'query', function(params, callback) {
-        callback(null, {Items: []});
+    test(async function () {
+      AWS.mock('DynamoDB.DocumentClient', 'query', function (params, callback) {
+        callback(null, { Items: [] });
       });
 
       const _a = new Alert();
@@ -103,19 +104,19 @@ describe('Alert', function() {
 
   it(
     'should return error information when user setting not found',
-    test(async function() {
-      AWS.mock('DynamoDB.DocumentClient', 'query', function(params, callback) {
-        callback(null, {Items: [_registrationItem]});
+    test(async function () {
+      AWS.mock('DynamoDB.DocumentClient', 'query', function (params, callback) {
+        callback(null, { Items: [_registrationItem] });
       });
 
-      AWS.mock('DynamoDB.DocumentClient', 'get', function(params, callback) {
+      AWS.mock('DynamoDB.DocumentClient', 'get', function (params, callback) {
         callback(null, {});
       });
 
       AWS.mock(
         'CognitoIdentityServiceProvider',
         'listUsers',
-        Promise.resolve({Users: [{Attributes: _cognitoUserAttributes}]})
+        Promise.resolve({ Users: [{ Attributes: _cognitoUserAttributes }] })
       );
 
       const _a = new Alert();
@@ -134,15 +135,15 @@ describe('Alert', function() {
 
   it(
     'should return error information when user phone_number not found',
-    test(async function() {
-      AWS.mock('DynamoDB.DocumentClient', 'query', function(params, callback) {
-        callback(null, {Items: [_registrationItem]});
+    test(async function () {
+      AWS.mock('DynamoDB.DocumentClient', 'query', function (params, callback) {
+        callback(null, { Items: [_registrationItem] });
       });
 
       AWS.mock(
         'CognitoIdentityServiceProvider',
         'listUsers',
-        Promise.resolve({Users: [{Attributes: []}]})
+        Promise.resolve({ Users: [{ Attributes: [] }] })
       );
 
       const _a = new Alert();
@@ -161,20 +162,20 @@ describe('Alert', function() {
 
   it(
     'should not send alert when user defined threshold does not match event type',
-    test(async function() {
+    test(async function () {
       _userSettingItem.setting.alertLevel = ['info'];
-      AWS.mock('DynamoDB.DocumentClient', 'query', function(params, callback) {
-        callback(null, {Items: [_registrationItem]});
+      AWS.mock('DynamoDB.DocumentClient', 'query', function (params, callback) {
+        callback(null, { Items: [_registrationItem] });
       });
 
-      AWS.mock('DynamoDB.DocumentClient', 'get', function(params, callback) {
-        callback(null, {Item: _userSettingItem});
+      AWS.mock('DynamoDB.DocumentClient', 'get', function (params, callback) {
+        callback(null, { Item: _userSettingItem });
       });
 
       AWS.mock(
         'CognitoIdentityServiceProvider',
         'listUsers',
-        Promise.resolve({Users: [{Attributes: _cognitoUserAttributes}]})
+        Promise.resolve({ Users: [{ Attributes: _cognitoUserAttributes }] })
       );
 
       const _a = new Alert();
@@ -193,20 +194,20 @@ describe('Alert', function() {
 
   it(
     'should not send alert when user defined not sending SMS',
-    test(async function() {
+    test(async function () {
       _userSettingItem.setting.sendNotification = false;
-      AWS.mock('DynamoDB.DocumentClient', 'query', function(params, callback) {
-        callback(null, {Items: [_registrationItem]});
+      AWS.mock('DynamoDB.DocumentClient', 'query', function (params, callback) {
+        callback(null, { Items: [_registrationItem] });
       });
 
-      AWS.mock('DynamoDB.DocumentClient', 'get', function(params, callback) {
-        callback(null, {Item: _userSettingItem});
+      AWS.mock('DynamoDB.DocumentClient', 'get', function (params, callback) {
+        callback(null, { Item: _userSettingItem });
       });
 
       AWS.mock(
         'CognitoIdentityServiceProvider',
         'listUsers',
-        Promise.resolve({Users: [{Attributes: _cognitoUserAttributes}]})
+        Promise.resolve({ Users: [{ Attributes: _cognitoUserAttributes }] })
       );
 
       const _a = new Alert();
@@ -225,21 +226,21 @@ describe('Alert', function() {
 
   it(
     'should return failure when alert not sent due to sns failure',
-    test(async function() {
+    test(async function () {
       _userSettingItem.setting.alertLevel = ['warning', 'error'];
       _userSettingItem.setting.sendNotification = true;
-      AWS.mock('DynamoDB.DocumentClient', 'query', function(params, callback) {
-        callback(null, {Items: [_registrationItem]});
+      AWS.mock('DynamoDB.DocumentClient', 'query', function (params, callback) {
+        callback(null, { Items: [_registrationItem] });
       });
 
-      AWS.mock('DynamoDB.DocumentClient', 'get', function(params, callback) {
-        callback(null, {Item: _userSettingItem});
+      AWS.mock('DynamoDB.DocumentClient', 'get', function (params, callback) {
+        callback(null, { Item: _userSettingItem });
       });
 
       AWS.mock(
         'CognitoIdentityServiceProvider',
         'listUsers',
-        Promise.resolve({Users: [{Attributes: _cognitoUserAttributes}]})
+        Promise.resolve({ Users: [{ Attributes: _cognitoUserAttributes }] })
       );
 
       AWS.mock('SNS', 'publish', Promise.reject());
@@ -259,8 +260,8 @@ describe('Alert', function() {
 
   it(
     'should return failure when validate registration api fails',
-    test(async function() {
-      AWS.mock('DynamoDB.DocumentClient', 'query', function(params, callback) {
+    test(async function () {
+      AWS.mock('DynamoDB.DocumentClient', 'query', function (params, callback) {
         callback('error', null);
       });
 
@@ -280,9 +281,9 @@ describe('Alert', function() {
 
   it(
     'should return failure when cognito api fails',
-    test(async function() {
-      AWS.mock('DynamoDB.DocumentClient', 'query', function(params, callback) {
-        callback(null, {Items: [_registrationItem]});
+    test(async function () {
+      AWS.mock('DynamoDB.DocumentClient', 'query', function (params, callback) {
+        callback(null, { Items: [_registrationItem] });
       });
       AWS.mock('CognitoIdentityServiceProvider', 'listUsers', Promise.reject());
       const _a = new Alert();
@@ -301,20 +302,20 @@ describe('Alert', function() {
 
   it(
     'should return failure when dynamodb api fails to get user config',
-    test(async function() {
+    test(async function () {
       _userSettingItem.setting.alertLevel = ['warning', 'error'];
-      AWS.mock('DynamoDB.DocumentClient', 'query', function(params, callback) {
-        callback(null, {Items: [_registrationItem]});
+      AWS.mock('DynamoDB.DocumentClient', 'query', function (params, callback) {
+        callback(null, { Items: [_registrationItem] });
       });
 
-      AWS.mock('DynamoDB.DocumentClient', 'get', function(params, callback) {
+      AWS.mock('DynamoDB.DocumentClient', 'get', function (params, callback) {
         callback('error', null);
       });
 
       AWS.mock(
         'CognitoIdentityServiceProvider',
         'listUsers',
-        Promise.resolve({Users: [{Attributes: _cognitoUserAttributes}]})
+        Promise.resolve({ Users: [{ Attributes: _cognitoUserAttributes }] })
       );
 
       const _a = new Alert();

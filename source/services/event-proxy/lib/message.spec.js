@@ -8,6 +8,7 @@ let AWS = require('aws-sdk-mock');
 
 let Message = require('./message.js');
 
+// TODO: Update for fan controllers
 let message = {
   createdAt: '2018-02-06T20:57:48Z',
   deviceId: '42adad4d-fdd1-4db0-a501-61cffd0fa3e4',
@@ -26,7 +27,7 @@ let message = {
 
 let successUserId = {
   Items: [
-    { 
+    {
       deviceId: '21c131f9-81a1-4c4f-8d3d-919803ca3234',
       userId: '6aeec314-405d-4371-b2f9-42bab52c2ea1',
       updatedAt: '2019-05-17T15:45:55.687Z',
@@ -39,19 +40,19 @@ let successUserId = {
   ScannedCount: 1
 };
 
-describe('Message', function() {
-  beforeEach(function() {});
+describe('Message', function () {
+  beforeEach(function () { });
 
-  describe('#createEvent', function() {
-    afterEach(function() {
+  describe('#createEvent', function () {
+    afterEach(function () {
       AWS.restore('DynamoDB.DocumentClient');
     });
 
-    it('should return event with successful create', function(done) {
-      AWS.mock('DynamoDB.DocumentClient', 'query', function(params, callback) {
+    it('should return event with successful create', function (done) {
+      AWS.mock('DynamoDB.DocumentClient', 'query', function (params, callback) {
         callback(null, successUserId);
       });
-      AWS.mock('DynamoDB.DocumentClient', 'put', function(params, callback) {
+      AWS.mock('DynamoDB.DocumentClient', 'put', function (params, callback) {
         callback(null, message);
       });
 
@@ -69,11 +70,11 @@ describe('Message', function() {
         });
     });
 
-    it('should return error information when ddb put fails', function(done) {
-      AWS.mock('DynamoDB.DocumentClient', 'query', function(params, callback) {
+    it('should return error information when ddb put fails', function (done) {
+      AWS.mock('DynamoDB.DocumentClient', 'query', function (params, callback) {
         callback(null, successUserId);
       });
-      AWS.mock('DynamoDB.DocumentClient', 'put', function(params, callback) {
+      AWS.mock('DynamoDB.DocumentClient', 'put', function (params, callback) {
         callback('ddb error', null);
       });
 
@@ -89,7 +90,7 @@ describe('Message', function() {
             error: 'EventCreateFailure',
             message: `Error occurred while attempting to create event message for device ${
               message.deviceId
-            }.`,
+              }.`,
           });
           done();
         });

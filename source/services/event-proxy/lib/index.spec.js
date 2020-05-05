@@ -12,16 +12,17 @@ const Message = require('./message.js');
 
 let sandbox;
 
-describe('Index', function() {
-  beforeEach(function() {
+describe('Index', function () {
+  beforeEach(function () {
     sandbox = sinon.createSandbox();
   });
 
-  afterEach(function() {
+  afterEach(function () {
     sandbox.restore();
   });
 
-  it('should return event message with successful library Message createEvent response', function(done) {
+  // TODO: Update for fan controllers
+  it('should return event message with successful library Message createEvent response', function (done) {
     const _event = {
       createdAt: '2018-02-06T20:57:48Z',
       deviceId: '42adad4d-fdd1-4db0-a501-61cffd0fa3e4',
@@ -60,7 +61,7 @@ describe('Index', function() {
       });
   });
 
-  it('should return error with failed library Message createEvent response', function(done) {
+  it('should return error with failed library Message createEvent response', function (done) {
     const _event = {
       createdAt: '2018-02-06T20:57:48Z',
       deviceId: '42adad4d-fdd1-4db0-a501-61cffd0fa3e4',
@@ -82,7 +83,7 @@ describe('Index', function() {
       error: 'EventCreateFailure',
       message: `Error occurred while attempting to create event message for device ${
         _event.deviceId
-      }.`,
+        }.`,
     };
 
     sandbox.stub(Message.prototype, 'createEvent').rejects(_resp);
@@ -100,7 +101,7 @@ describe('Index', function() {
       });
   });
 
-  it('should return error for failed lambda invocation', function(done) {
+  it('should return error for failed lambda invocation', function (done) {
     const _event = {
       createdAt: '2018-02-06T20:57:48Z',
       deviceId: '42adad4d-fdd1-4db0-a501-61cffd0fa3e4',

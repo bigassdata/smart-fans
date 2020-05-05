@@ -133,7 +133,7 @@ class Command {
         try {
           let data = await this._getCommandsPage(deviceId, lastevalkey, commandStatus, length);
           commands = [...commands, ...data.Items];
-        result.LastEvaluatedKey = data.LastEvaluatedKey;
+          result.LastEvaluatedKey = data.LastEvaluatedKey;
         } catch (err) {
           return Promise.reject(err);
         }
@@ -221,6 +221,8 @@ class Command {
     const powerStatuses = ['HEAT', 'AC', 'OFF'];
 
     /**
+     * TODO: Adjust the commands to our Fan Controller scenario
+     *
      * The solution is for HVAC devices, and this will suppose the command JSON would contain below keys and values.
      * command {
      *   commandDetails: {
@@ -369,7 +371,7 @@ class Command {
         apiVersion: '2015-05-28',
       });
       const _shadow = await iotdata
-        .getThingShadow({thingName: _deviceId})
+        .getThingShadow({ thingName: _deviceId })
         .promise();
       Logger.log(
         Logger.levels.ROBUST,
@@ -400,7 +402,7 @@ class Command {
       Logger.error(
         Logger.levels.INFO,
         `[DeviceShadowUpdateFailure] Error occurred while attempting to update device shadow for command ${
-          command.deviceId
+        command.deviceId
         }.`
       );
       return Promise.reject({

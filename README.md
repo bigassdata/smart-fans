@@ -1,3 +1,7 @@
+# Smart Fans
+
+We are customizing this reference architecture for Big Ass Fans to be a Proof of Concept.  [Here is the wiki](https://github.com/bigassdata/smart-fans/wiki) that describes the steps/progress.
+
 ## Smart Product Solution
 Smart, connected products are completely transforming the value chain. As a result, companies are redefining their industries and rethinking nearly everything they do. The ability for smart products to monitor themselves, their environments and enable remote control, optimization, and automation allows manufacturers to think about their business in new ways. Freshly available features and functions can be delivered directly to their products and users to improve revenue and margins.
 

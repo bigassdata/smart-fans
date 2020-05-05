@@ -5,6 +5,7 @@ const expect = require('chai').expect;
 const lib = require('./index.js');
 let event = {};
 
+// TODO: Update for fan controllers
 const successData = [
   {
     createdAt: '2019-05-01T12:43:07-07:00',
@@ -45,7 +46,7 @@ const successData = [
 ];
 
 describe('Index', () => {
-  beforeEach(() => {});
+  beforeEach(() => { });
 
   it('should return event messages with Celsius temperature and UTC time if keys exist', (done) => {
     event = [
