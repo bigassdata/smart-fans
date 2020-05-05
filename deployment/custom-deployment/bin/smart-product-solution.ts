@@ -15,4 +15,4 @@ import cdk = require('@aws-cdk/core');
 import { SmartProductSolutionStack } from '../lib/smart-product-solution-stack';
 
 const app = new cdk.App();
-new SmartProductSolutionStack(app, 'SmartProductSolutionStack');
+new SmartProductSolutionStack(app, 'SmartFansStack');

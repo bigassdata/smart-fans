@@ -1,6 +1,6 @@
 {
     "default": {
-        "version": "v0.0.1",
+        "version": "v0.0.2",
         "sendAnonymousUsage": true,
         "api": {
             "deploy": true
@@ -11,7 +11,7 @@
         "events": {
             "deploy": true,
             "env": {
-                "eventTopic": "smartproduct/event"
+                "eventTopic": "smartfans/event"
             }
         },
         "jitr": {
@@ -23,7 +23,7 @@
         "telemetry": {
             "deploy": true,
             "env": {
-                "telemetryTopic": "smartproduct/telemetry"
+                "telemetryTopic": "smartfans/telemetry"
             }
         }
     }
