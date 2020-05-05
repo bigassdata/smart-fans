@@ -29,20 +29,22 @@ const has = Object.prototype.hasOwnProperty;
  * @param {number} temperature
  * @returns {number}
  */
-const fahrenheitToCelsius = temperature => {
-  return parseFloat((((temperature - 32) * 5) / 9).toFixed(2));
-};
+// const fahrenheitToCelsius = temperature => {
+//   return parseFloat((((temperature - 32) * 5) / 9).toFixed(2));
+// };
 
-const process = async function(event) {
+const process = async function (event) {
   try {
     event.forEach(e => {
-      // Converting temperature from Fahrenheit to Celsius
-      if (has.call(e, 'actualTemperature')) {
-        e.actualTemperatureC = fahrenheitToCelsius(e.actualTemperature);
-      }
-      if (has.call(e, 'targetTemperature')) {
-        e.targetTemperatureC = fahrenheitToCelsius(e.targetTemperature);
-      }
+      // Not needed for Smart Fans.  Communication is all in Celsius
+      // Leaving as an example of adding information to messages.
+      // // Converting temperature from Fahrenheit to Celsius
+      // if (has.call(e, 'actualTemperature')) {
+      //   e.actualTemperatureC = fahrenheitToCelsius(e.actualTemperature);
+      // }
+      // if (has.call(e, 'targetTemperature')) {
+      //   e.targetTemperatureC = fahrenheitToCelsius(e.targetTemperature);
+      // }
 
       // Adding UTC time
       if (has.call(e, 'timestamp')) {
