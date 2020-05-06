@@ -21,12 +21,10 @@ describe('Device', function () {
       activatedAt: "2018-02-06T22:58:18Z",
       createdAt: "2018-02-06T20:57:48Z",
       details: {
-        model: "INFINITY 19 HEAT PUMP",
-        modelNumber: "25HNB9",
-        capacity: "2-5 ton",
-        requirement: "208-230 V",
-        coolingEfficiency: "Up to 19 SEER",
-        heatingEfficiency: "Up to 10 HSPF"
+        model: "BAFCon 2",
+        modelNumber: "BAFCON2",
+        mfgDate: "2018-02-06",
+        initialFirmwareVersion: "1.0.0"
       },
       userId: "085e4e22-bd06-4ca6-b913-SUBSAMPLE",
       deviceId: "085e4e22-bd06-4ca6-b913-8b0b6bf154c1",
@@ -39,7 +37,7 @@ describe('Device', function () {
     thingId: "23da892a-0268-49d8-9a7b-c8548b4605f1",
     thingArn: "arn:aws:iot:region:accountId:thing/something",
     attributes: {
-      modelNumber: "model-number",
+      modelNumber: "BAFCON2",
       userId: "085e4e22-bd06-4ca6-b913-SUBSAMPLE",
       deviceName: "deviceName"
     },
@@ -56,7 +54,7 @@ describe('Device', function () {
         thingId: "b0f4eae4-16f3-49f4-8db3-7e61acda3c8b",
         thingTypeName: null,
         attributes: {
-          modelNumber: "model-number",
+          modelNumber: "BAFCON2",
           userId: "085e4e22-bd06-4ca6-b913-SUBSAMPLE",
           deviceName: "deviceName"
         },
