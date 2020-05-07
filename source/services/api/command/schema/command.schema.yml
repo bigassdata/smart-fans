@@ -1,0 +1,33 @@
+---
+meta: |
+  This schema provides a set of hierarchical commands based on hyphen (-)
+  separated parts.  For example, `set-fan-power` is a command to turn a
+  fan on or off based on the arguments.
+
+set:
+  ztt: # set-ztt commands for Zero-to-ten devices.
+    deviceType: # The type of 0-10V device connected
+      value: string
+    power: # Power the 0-10V device on or off
+      value: boolean
+    autoEnable: # Allow the 0-10V device to run in auto mode.
+      value: boolean
+    levelPercent: # Set the percentage/level of device (e.g. speed or brightness)
+      value: number
+  autoIdealTemperature: # Set the ideal temperature for auto mode (in Celsius)
+    value: number
+  fan:
+    power: # Set the fan at `address` to power = `value`
+      value: boolean
+      address: modbusAddress
+    commandedSpeedPercent: # Set the fan at `address` to percentage `value`
+      value: number
+      address: modbusAddress
+    isForward: # Set the fan at `address` to forward/reverse.
+      value: boolean
+      address: modbusAddress
+    resetFaults: # Reset the faults for the fan at `address`
+      address: modbusAddress
+    autoEnable: # Enable/disable auto mode for the fan at `address`
+      value: boolean
+      address: modbusAddress
