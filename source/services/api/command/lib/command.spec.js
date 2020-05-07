@@ -14,18 +14,21 @@ let Command = require('./command.js');
 describe('Command', function () {
   const deviceId = '42adad4d-fdd1-4db0-a501-61cffd0fa3e4';
 
+  const commandObj = {
+    command: 'set-autoIdealTemperature',
+    value: 23.3,
+  }
+
   const command = {
     deviceId: '42adad4d-fdd1-4db0-a501-61cffd0fa3e4',
     commandId: '82bfgd4y-uu81-io10-a602-56cnb0fhs34',
     createdAt: '2018-02-06T20:57:48Z',
     commandDetails: {
-      command: 'set-temp',
-      value: 70,
+      command: 'set-autoIdealTemperature',
+      value: 23.3,
     },
     shadowDetails: {
-      powerStatus: 'HEAT',
-      actualTemperature: 60,
-      targetTemperature: 70,
+      autoIdealTemperature: 23.3
     },
     userId: '085e4e22-bd06-4ca6-b913-8b0b6bf154c1',
     status: 'pending',
@@ -435,7 +438,7 @@ describe('Command', function () {
         stub2.resolves();
 
         _command
-          .createCommand(ticket, deviceId, command)
+          .createCommand(ticket, deviceId, commandObj)
           .then(data => {
             AWS.restore('DynamoDB.DocumentClient');
             assert.exists(data.commandId);
@@ -473,7 +476,7 @@ describe('Command', function () {
         stub.rejects('showdow update error');
 
         _command
-          .createCommand(ticket, deviceId, command)
+          .createCommand(ticket, deviceId, commandObj)
           .then(_data => {
             AWS.restore('DynamoDB.DocumentClient');
             done('negative test');
@@ -514,7 +517,7 @@ describe('Command', function () {
         stub2.rejects('error in publishing to IoT topic');
 
         _command
-          .createCommand(ticket, deviceId, command)
+          .createCommand(ticket, deviceId, commandObj)
           .then(data => {
             AWS.restore('DynamoDB.DocumentClient');
             done('negative test');
@@ -539,7 +542,7 @@ describe('Command', function () {
 
       let _command = new Command();
       _command
-        .createCommand(ticket, deviceId, command)
+        .createCommand(ticket, deviceId, commandObj)
         .then(data => {
           AWS.restore('DynamoDB.DocumentClient');
           done('negative test');
@@ -563,7 +566,7 @@ describe('Command', function () {
 
       let _command = new Command();
       _command
-        .createCommand(ticket, deviceId, command)
+        .createCommand(ticket, deviceId, commandObj)
         .then(data => {
           AWS.restore('DynamoDB.DocumentClient');
           done('negative test');
@@ -580,53 +583,9 @@ describe('Command', function () {
     });
 
     it('should return error when commandDetails is missing', function (done) {
-      let invalidCommand = {
-        deviceId: '42adad4d-fdd1-4db0-a501-61cffd0fa3e4',
-        commandId: '82bfgd4y-uu81-io10-a602-56cnb0fhs34',
-        createdAt: '2018-02-06T20:57:48Z',
-        shadowDetails: {
-          powerStatus: 'HEAT',
-          actualTemperature: 60,
-          targetTemperature: 70,
-        },
-        userId: '085e4e22-bd06-4ca6-b913-8b0b6bf154c1',
-        status: 'pending',
-        updatedAt: '2018-02-06T20:57:48Z',
-      };
-
       let _command = new Command();
       _command
-        .createCommand(ticket, deviceId, invalidCommand)
-        .then(() => {
-          done('negative test');
-        })
-        .catch(err => {
-          assert.deepEqual(err, {
-            code: 400,
-            error: 'InvalidParameter',
-            message: 'Body parameters are invalid. Please check the API specification.',
-          });
-          done();
-        });
-    });
-
-    it('should return error when shadowDetails is missing', function (done) {
-      let invalidCommand = {
-        deviceId: '42adad4d-fdd1-4db0-a501-61cffd0fa3e4',
-        commandId: '82bfgd4y-uu81-io10-a602-56cnb0fhs34',
-        createdAt: '2018-02-06T20:57:48Z',
-        commandDetails: {
-          command: 'set-temp',
-          value: 70,
-        },
-        userId: '085e4e22-bd06-4ca6-b913-8b0b6bf154c1',
-        status: 'pending',
-        updatedAt: '2018-02-06T20:57:48Z',
-      };
-
-      let _command = new Command();
-      _command
-        .createCommand(ticket, deviceId, invalidCommand)
+        .createCommand(ticket, deviceId, {})
         .then(() => {
           done('negative test');
         })
@@ -641,27 +600,14 @@ describe('Command', function () {
     });
 
     it('should return error when command is invalid', function (done) {
-      let invalidCommand = {
-        deviceId: '42adad4d-fdd1-4db0-a501-61cffd0fa3e4',
-        commandId: '82bfgd4y-uu81-io10-a602-56cnb0fhs34',
-        createdAt: '2018-02-06T20:57:48Z',
-        commandDetails: {
-          command: 'set-invalid',
-          value: 70,
-        },
-        shadowDetails: {
-          powerStatus: 'HEAT',
-          actualTemperature: 60,
-          targetTemperature: 70,
-        },
-        userId: '085e4e22-bd06-4ca6-b913-8b0b6bf154c1',
-        status: 'pending',
-        updatedAt: '2018-02-06T20:57:48Z',
-      };
+      let invalidCommandObj = {
+        command: 'set-invalid',
+        value: 70,
+      }
 
       let _command = new Command();
       _command
-        .createCommand(ticket, deviceId, invalidCommand)
+        .createCommand(ticket, deviceId, invalidCommandObj)
         .then(() => {
           done('negative test');
         })
@@ -676,27 +622,14 @@ describe('Command', function () {
     });
 
     it('should return error when value is not number to set temperature', function (done) {
-      let invalidCommand = {
-        deviceId: '42adad4d-fdd1-4db0-a501-61cffd0fa3e4',
-        commandId: '82bfgd4y-uu81-io10-a602-56cnb0fhs34',
-        createdAt: '2018-02-06T20:57:48Z',
-        commandDetails: {
-          command: 'set-temp',
-          value: 'wrong',
-        },
-        shadowDetails: {
-          powerStatus: 'HEAT',
-          actualTemperature: 60,
-          targetTemperature: 70,
-        },
-        userId: '085e4e22-bd06-4ca6-b913-8b0b6bf154c1',
-        status: 'pending',
-        updatedAt: '2018-02-06T20:57:48Z',
-      };
+      let invalidCommandObj = {
+        command: 'set-autoIdealTemperature',
+        value: 'wrong'
+      }
 
       let _command = new Command();
       _command
-        .createCommand(ticket, deviceId, invalidCommand)
+        .createCommand(ticket, deviceId, invalidCommandObj)
         .then(() => {
           done('negative test');
         })
@@ -710,98 +643,16 @@ describe('Command', function () {
         });
     });
 
-    it('should return error when power status is not valid', function (done) {
-      let invalidCommand = {
-        deviceId: '42adad4d-fdd1-4db0-a501-61cffd0fa3e4',
-        commandId: '82bfgd4y-uu81-io10-a602-56cnb0fhs34',
-        createdAt: '2018-02-06T20:57:48Z',
-        commandDetails: {
-          command: 'set-temp',
-          value: '70',
-        },
-        shadowDetails: {
-          powerStatus: 'wrong',
-          actualTemperature: 60,
-          targetTemperature: 70,
-        },
-        userId: '085e4e22-bd06-4ca6-b913-8b0b6bf154c1',
-        status: 'pending',
-        updatedAt: '2018-02-06T20:57:48Z',
-      };
+    it('should return error when address is not within the acceptable number', function (done) {
+      let invalidCommandObj = {
+        command: 'set-fan-autoEnable',
+        value: true,
+        address: 248
+      }
 
       let _command = new Command();
       _command
-        .createCommand(ticket, deviceId, invalidCommand)
-        .then(() => {
-          done('negative test');
-        })
-        .catch(err => {
-          assert.deepEqual(err, {
-            code: 400,
-            error: 'InvalidParameter',
-            message: 'Body parameters are invalid. Please check the API specification.',
-          });
-          done();
-        });
-    });
-
-    it('should return error when target temperature is not number', function (done) {
-      let invalidCommand = {
-        deviceId: '42adad4d-fdd1-4db0-a501-61cffd0fa3e4',
-        commandId: '82bfgd4y-uu81-io10-a602-56cnb0fhs34',
-        createdAt: '2018-02-06T20:57:48Z',
-        commandDetails: {
-          command: 'set-temp',
-          value: 70,
-        },
-        shadowDetails: {
-          powerStatus: 'HEAT',
-          actualTemperature: 60,
-          targetTemperature: 'string',
-        },
-        userId: '085e4e22-bd06-4ca6-b913-8b0b6bf154c1',
-        status: 'pending',
-        updatedAt: '2018-02-06T20:57:48Z',
-      };
-
-      let _command = new Command();
-      _command
-        .createCommand(ticket, deviceId, invalidCommand)
-        .then(() => {
-          done('negative test');
-        })
-        .catch(err => {
-          assert.deepEqual(err, {
-            code: 400,
-            error: 'InvalidParameter',
-            message: 'Body parameters are invalid. Please check the API specification.',
-          });
-          done();
-        });
-    });
-
-    it('should return error when target temperature is not within the acceptable number', function (done) {
-      let invalidCommand = {
-        deviceId: '42adad4d-fdd1-4db0-a501-61cffd0fa3e4',
-        commandId: '82bfgd4y-uu81-io10-a602-56cnb0fhs34',
-        createdAt: '2018-02-06T20:57:48Z',
-        commandDetails: {
-          command: 'set-temp',
-          value: 70,
-        },
-        shadowDetails: {
-          powerStatus: 'HEAT',
-          actualTemperature: 60,
-          targetTemperature: 0,
-        },
-        userId: '085e4e22-bd06-4ca6-b913-8b0b6bf154c1',
-        status: 'pending',
-        updatedAt: '2018-02-06T20:57:48Z',
-      };
-
-      let _command = new Command();
-      _command
-        .createCommand(ticket, deviceId, invalidCommand)
+        .createCommand(ticket, deviceId, invalidCommandObj)
         .then(() => {
           done('negative test');
         })

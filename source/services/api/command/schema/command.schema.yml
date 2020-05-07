@@ -5,7 +5,7 @@ meta: |
   fan on or off based on the arguments.
 
 set:
-  ztt: # set-ztt commands for Zero-to-ten devices.
+  zeroToTen: # set-zeroToTen commands for 0-10V devices.
     deviceType: # The type of 0-10V device connected
       value: string
     power: # Power the 0-10V device on or off
@@ -17,6 +17,9 @@ set:
   autoIdealTemperature: # Set the ideal temperature for auto mode (in Celsius)
     value: number
   fan:
+    fanType: # Set the type of fan at `address`
+      value: string
+      address: modbusAddress
     power: # Set the fan at `address` to power = `value`
       value: boolean
       address: modbusAddress

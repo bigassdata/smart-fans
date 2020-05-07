@@ -39,29 +39,10 @@ const typeValidator = {
  */
 const commandSchema = yaml.load(
     fs.readFileSync(
-        'schema/command.schema.yml',
+        `${__dirname}/../schema/command.schema.yml`,
         { encoding: 'utf-8' }
     )
 );
-
-// {
-//     "set": {
-//         "ztt": {
-//             "deviceType": { "value": "string" },
-//             "power": { "value": "boolean" },
-//             "autoEnable": { "value": "boolean" },
-//             "levelPercent": { "value": "number" }
-//         },
-//         "autoIdealTemperature": { "value": "number" },
-//         "fan": {
-//             "power": { "value": "boolean", "address": "modbusAddress" },
-//             "commandedSpeedPercent": { "value": "number", "address": "modbusAddress" },
-//             "isForward": { "value": "boolean", "address": "modbusAddress" },
-//             "resetFaults": { "address": "modbusAddress" },
-//             "autoEnable": { "value": "boolean", "address": "modbusAddress" }
-//         }
-//     }
-// }
 
 /**
  * @typedef CommandDetails

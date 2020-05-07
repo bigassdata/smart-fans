@@ -24,6 +24,8 @@ const _ = require('underscore');
 const uuidv4 = require('uuid/v4');
 const UsageMetrics = require('usage-metrics');
 const CommonUtils = require('utils');
+const commandValidator = require('./commandValidator');
+const commandToShadowTransform = require('./commandtoShadowTransform');
 
 /**
  * Performs command actions for a user, such as, retrieving and logging device command information.
@@ -217,49 +219,21 @@ class Command {
    * @param {JSON} command - device command object
    */
   async createCommand(ticket, deviceId, command) {
-    const commandModes = ['set-temp', 'set-mode'];
-    const powerStatuses = ['HEAT', 'AC', 'OFF'];
-
     /**
-     * TODO: Adjust the commands to our Fan Controller scenario
-     *
-     * The solution is for HVAC devices, and this will suppose the command JSON would contain below keys and values.
+     * The complete syntax for commands is in /schema/command.schema.yml.
      * command {
-     *   commandDetails: {
-     *     command: "set-temp" | "set-mode",
-     *     value: number | "HEAT" | "AC" | "OFF"
-     *   },
-     *   shadowDetails: {
-     *     powerStatus: "HEAT" | "AC" | "OFF",
-     *     actualTemperature: number,
-     *     targetTemperature: number
-     *   }
+     *   command: "set-autoIdealTemperature" | "set-fan-power" | "set-ztt-power" | ...
+     *   value: number | string | boolean
+     *   address: modbusAddress (number between 1 and 247)
      * }
-     * command.commandDetails are for DynamoDB item, and command.shadowDetails are for sending data to device.
+     *
+     * command becomes command.commandDetails.  These are for dynamoDB.
+     * We generate command.shadowDetails for sending data to device.
      */
     let isCommandValid = true;
-    if (command.commandDetails === undefined
-      || command.shadowDetails === undefined
-      || commandModes.indexOf(command.commandDetails.command) < 0
-      || powerStatuses.indexOf(command.shadowDetails.powerStatus) < 0
-      || isNaN(command.shadowDetails.targetTemperature)
-      || command.shadowDetails.targetTemperature < 50
-      || command.shadowDetails.targetTemperature > 110) {
+    if (command === undefined
+      || !commandValidator.isValid(command)) {
       isCommandValid = false
-    } else {
-      if (command.commandDetails.command === 'set-temp') {
-        if (isNaN(command.commandDetails.value)) {
-          isCommandValid = false;
-        } else {
-          // Fix temperature precision, only keeps 2 precisions
-          let targetTemperature = parseFloat(command.shadowDetails.targetTemperature).toFixed(2);
-          if (parseInt(targetTemperature.slice(targetTemperature.indexOf('.') + 1)) === 0) {
-            targetTemperature = parseFloat(command.shadowDetails.targetTemperature).toFixed(0);
-          }
-          command.shadowDetails.targetTemperature = targetTemperature;
-          command.commandDetails.value = targetTemperature;
-        }
-      }
     }
 
     if (!isCommandValid) {
@@ -281,10 +255,7 @@ class Command {
           commandId: uuidv4(),
           deviceId: deviceId,
           status: 'pending',
-          details: {
-            command: command.commandDetails.command,
-            value: command.commandDetails.value
-          },
+          details: command,
           userId: ticket.sub,
           createdAt: moment().utc().format(),
           updatedAt: moment().utc().format(),
@@ -297,11 +268,8 @@ class Command {
 
         await docClient.put(params).promise();
 
-        let shadowDetails = {
-          powerStatus: command.shadowDetails.powerStatus,
-          actualTemperature: command.shadowDetails.actualTemperature,
-          targetTemperature: command.shadowDetails.targetTemperature
-        }
+        let shadowDetails = commandToShadowTransform.transform(command);
+
         await this.shadowUpdate(_command, shadowDetails); //best practise to update device shadow
         await this.publishCommand(_command, shadowDetails); //publish on IoT topic for the device
 

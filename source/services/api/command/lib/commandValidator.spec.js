@@ -56,32 +56,32 @@ describe('CommandValidator', function () {
         expect(isValid(validCommand)).to.be.true;
     })
 
-    describe('For ztt (0-10V) commands', () => {
+    describe('For zeroToTen (0-10V) commands', () => {
 
-        it('Validates set-ztt-deviceType', () => {
+        it('Validates set-zeroToTen-deviceType', () => {
             expect(isValid({
-                command: 'set-ztt-deviceType',
+                command: 'set-zeroToTen-deviceType',
                 value: "Test Device Type"
             })).to.be.true;
         });
 
-        it('Validates set-ztt-power', () => {
+        it('Validates set-zeroToTen-power', () => {
             expect(isValid({
-                command: 'set-ztt-power',
+                command: 'set-zeroToTen-power',
                 value: true
             })).to.be.true;
         });
 
-        it('Validates set-ztt-autoEnable', () => {
+        it('Validates set-zeroToTen-autoEnable', () => {
             expect(isValid({
-                command: 'set-ztt-autoEnable',
+                command: 'set-zeroToTen-autoEnable',
                 value: true
             })).to.be.true;
         });
 
-        it('Validates set-ztt-levelPercent', () => {
+        it('Validates set-zeroToTen-levelPercent', () => {
             expect(isValid({
-                command: 'set-ztt-levelPercent',
+                command: 'set-zeroToTen-levelPercent',
                 value: 25.3
             })).to.be.true;
         });
@@ -130,6 +130,14 @@ describe('CommandValidator', function () {
             })).to.be.true;
 
 
+        });
+
+        it('Validates set-fan-fanType', () => {
+            expect(isValid({
+                command: 'set-fan-fanType',
+                value: "Powerfoil X",
+                address: 2
+            })).to.be.true;
         });
 
         it('Validates set-fan-power', () => {
