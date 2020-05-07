@@ -61,15 +61,15 @@ export function addMethod(resources: IMethodResource[], apiLambdaExecRole: iam.R
           "application/json": "{\"statusCode\": 200}"
         },
       }), {
-        methodResponses: [{
-          statusCode: '200',
-          responseParameters: {
-            'method.response.header.Access-Control-Allow-Headers': true,
-            'method.response.header.Access-Control-Allow-Methods': true,
-            'method.response.header.Access-Control-Allow-Origin': true
-          },
-        }]
-      }
+      methodResponses: [{
+        statusCode: '200',
+        responseParameters: {
+          'method.response.header.Access-Control-Allow-Headers': true,
+          'method.response.header.Access-Control-Allow-Methods': true,
+          'method.response.header.Access-Control-Allow-Origin': true
+        },
+      }]
+    }
     );
 
     let anyMethod = apiResource.addMethod('ANY', new apigateway.LambdaIntegration(lambdaFunction), {
@@ -420,18 +420,18 @@ export class SmartProductApi extends cdk.Construct {
 
     addMethod(
       [
-        { apiResource: configRes, lambdaFunction: adminService},
-        { apiResource: registrationRes, lambdaFunction: registrationService},
-        { apiResource: devicesRes, lambdaFunction: deviceService},
-        { apiResource: eventsRes, lambdaFunction: eventService},
-        { apiResource: alertsRes, lambdaFunction: eventService},
-        { apiResource: countRes, lambdaFunction: eventService},
-        { apiResource: deviceRes, lambdaFunction: deviceService},
-        { apiResource: commandsRes, lambdaFunction: commandService},
-        { apiResource: commandRes, lambdaFunction: commandService},
-        { apiResource: deviceEventsRes, lambdaFunction: eventService},
-        { apiResource: deviceEventRes, lambdaFunction: eventService},
-        { apiResource: statusRes, lambdaFunction: statusService}
+        { apiResource: configRes, lambdaFunction: adminService },
+        { apiResource: registrationRes, lambdaFunction: registrationService },
+        { apiResource: devicesRes, lambdaFunction: deviceService },
+        { apiResource: eventsRes, lambdaFunction: eventService },
+        { apiResource: alertsRes, lambdaFunction: eventService },
+        { apiResource: countRes, lambdaFunction: eventService },
+        { apiResource: deviceRes, lambdaFunction: deviceService },
+        { apiResource: commandsRes, lambdaFunction: commandService },
+        { apiResource: commandRes, lambdaFunction: commandService },
+        { apiResource: deviceEventsRes, lambdaFunction: eventService },
+        { apiResource: deviceEventRes, lambdaFunction: eventService },
+        { apiResource: statusRes, lambdaFunction: statusService }
       ]
       , apiLambdaExecRole, authorizer.ref, apiDeployment);
 
@@ -444,7 +444,7 @@ export class SmartProductApi extends cdk.Construct {
         actions: [{ lambda: { functionArn: commandStatusService.functionArn } }],
         description: 'Command status for Smart Product Solution.',
         ruleDisabled: false,
-        sql: `select * from 'smartproduct/commands/#'`
+        sql: `select * from 'smartfans/commands/#'`
       }
     })
 

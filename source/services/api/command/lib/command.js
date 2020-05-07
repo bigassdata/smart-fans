@@ -407,7 +407,7 @@ class Command {
 
       const _result = await iotdata
         .publish({
-          topic: `smartproduct/commands/${command.deviceId}`,
+          topic: `smartfans/commands/${command.deviceId}`,
           payload: JSON.stringify(_command),
         })
         .promise();

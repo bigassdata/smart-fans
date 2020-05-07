@@ -5,7 +5,6 @@ const expect = require('chai').expect;
 const lib = require('./index.js');
 let event = {};
 
-// TODO: Update for fan controllers
 const successData = [
   {
     deviceId: '9fd6fd62-0b10-4b5c-a7a1-5995c81db07e',

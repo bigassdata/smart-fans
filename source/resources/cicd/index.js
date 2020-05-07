@@ -166,7 +166,7 @@ exports.handler = async (event, context) => {
       manifest.default.events = (event.ResourceProperties.EVENT === 'true') ? ({
         "deploy": true,
         "env": {
-          "eventTopic": "smartproduct/event"
+          "eventTopic": "smartfans/event"
         }
       }) : ({
         "deploy": false
@@ -176,7 +176,7 @@ exports.handler = async (event, context) => {
       manifest.default.telemetry = (event.ResourceProperties.TELEMETRY === 'true') ? ({
         "deploy": true,
         "env": {
-          "telemetryTopic": "smartproduct/telemetry"
+          "telemetryTopic": "smartfans/telemetry"
         }
       }) : ({
         "deploy": false

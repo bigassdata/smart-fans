@@ -40,7 +40,7 @@ const respond = async event => {
   // Replace it with your desired topic prefix
   const telemetryTopic = process.env.TELEMETRY_TOPIC; //for telemetry data
   const eventTopic = process.env.EVENT_TOPIC; //for device events
-  const commandTopic = 'smartproduct/commands'; //for device responses to commands
+  const commandTopic = 'smartfans/commands'; //for device responses to commands
 
   const certificateARN = `arn:aws:iot:${region}:${accountId}:cert/${certificateId}`;
   const policyName = `${certificateId}`;
