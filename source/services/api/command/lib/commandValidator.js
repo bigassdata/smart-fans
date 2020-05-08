@@ -1,6 +1,6 @@
 'use strict';
 
-const _ = require('underscore');
+const _ = require('lodash');
 const yaml = require('js-yaml');
 const fs = require('fs');
 
@@ -17,9 +17,7 @@ const typeValidator = {
     "string": _.isString,
     "number": _.isNumber,
     "boolean": _.isBoolean,
-    "modbusAddress": (value) => {
-        return _.isNumber(value) && value >= 1 && value <= 247;
-    }
+    "modbusAddress": (value) => _.isInteger(value) && value >= 1 && value <= 247
 }
 
 /**

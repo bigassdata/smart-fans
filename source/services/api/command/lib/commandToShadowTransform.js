@@ -1,6 +1,6 @@
 'use strict';
 
-const _ = require('underscore');
+const _ = require('lodash');
 
 /**
  * Takes a command object and returns the resulting
@@ -68,8 +68,9 @@ const build = (tree, list, command) => {
     // { command: set-autoIdealTemperature, value: 42} =>
     // { autoIdealTemperature: 42 }
     if (_.isEmpty(tree)) {
-        tree[_.head(list)] = _.isUndefined(command.value) ? true : command.value;
-        return build(tree, _.rest(list), command);
+        let newTree = {};
+        _.set(newTree, _.head(list), _.isUndefined(command.value) ? true : command.value);
+        return build(newTree, _.tail(list), command);
     }
 
     // We need to wrap the current `tree` with other objects
@@ -79,18 +80,15 @@ const build = (tree, list, command) => {
     // `fan` is an indexed command.  We have to wrap it in the address.
     // we could add other indexed commands in the future
     if (key === 'fan') {
-        newTree[command.address] = tree;
-        // swap this out so that the line below works
-        // whether the command is indexed or not
-        tree = newTree;
-        newTree = {};
+        _.set(newTree, `fan.${command.address}`, tree);
+    } else {
+        // wrap the `tree` in the first `list` value
+        _.set(newTree, key, tree);
     }
-    // wrap the `tree` in the first `list` value
-    newTree[key] = tree;
 
     // Recursive.  Send the tree so far, with the rest of the
     // `list` and the unchanged `command`
-    return build(newTree, _.rest(list), command);
+    return build(newTree, _.tail(list), command);
 }
 
 module.exports = { transform };

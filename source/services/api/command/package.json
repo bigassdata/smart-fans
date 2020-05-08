@@ -11,9 +11,9 @@
         "cors": "^2.8.3",
         "express": "^4.15.2",
         "js-yaml": "^3.13.1",
+        "lodash": "^4.17.15",
         "logger": "file:../../../resources/logger/",
         "moment": "*",
-        "underscore": "*",
         "usage-metrics": "file:../../../resources/usage-metrics",
         "utils": "file:../../../resources/utils/",
         "uuid": "^3.3.2"
