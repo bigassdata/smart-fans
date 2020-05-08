@@ -17,7 +17,7 @@ const temperatureChange = appConfig.temperatureChange;
 const publishInterval = appConfig.publishInterval;
 const statusInterval = appConfig.statusInterval;
 
-let actualTemperature = 71.5;
+let actualTemperature = 30;
 let autoIdealTemperature = 71.5;
 let flag = false;
 let clientToken;
@@ -38,28 +38,95 @@ const decreaseTemperature = () => {
     return Math.round(100 * (actualTemperature - temperatureChange)) / 100;
 }
 
-// // Get colored text
-// const getColoredText = (temperature, data) => {
-//     // targetTemperature - 10 > temperature: error
-//     // targetTemperature - 10 <= temperature < targetTemperature - 5: warning
-//     // targetTemperature + 5 < temperature <= targetTemperature + 10: warning
-//     // targetTemperature + 10 < temperature: error
-//     if (temperature > targetTemperature + 10) {
-//         publishEvent('error', 'Temperature is exceeding upper threshold', temperature);
-//         return data.red + ' (Danger: HOT)'.gray;
-//     } else if (temperature <= targetTemperature + 10 && temperature > targetTemperature + 5) {
-//         publishEvent('warning', 'Temperature is slightly exceeding upper threshold', temperature);
-//         return data.yellow + ' (Warning: WARM)'.gray;
-//     } else if (temperature >= targetTemperature - 10 && temperature < targetTemperature - 5) {
-//         publishEvent('warning', 'Temperature is slightly dropping under the threshold', temperature);
-//         return data.yellow + ' (Warning: CHILLY)'.gray;
-//     } else if (temperature < targetTemperature - 10) {
-//         publishEvent('error', 'Temperature is dropping under the threshold', temperature);
-//         return data.blue + ' (Danger: COLD)'.gray;
-//     } else {
-//         return data.cyan + ' (NICE)'.gray;
-//     }
-// }
+// Controller Initial State
+// TODO: userPasscode and adminPasscode values ommitted for now.
+let controllerState = {
+    instanceNumber: "3FFFFF",
+    autoIdealTemperature: 23.3,
+    actualTemperature: actualTemperature,
+    fan: {
+        1: {
+            fanType: "Powerfoil X",
+            power: true,
+            commandedSpeedPercent: 10.0,
+            actualSpeedPercent: 10.0,
+            isForward: true,
+            resetFaults: false,
+            autoEnable: true,
+            activeFault: "No Fault"
+        },
+        2: {
+            fanType: "Powerfoil X",
+            power: true,
+            commandedSpeedPercent: 10.0,
+            actualSpeedPercent: 10.0,
+            isForward: true,
+            resetFaults: false,
+            autoEnable: true,
+            activeFault: "No Fault"
+        },
+        3: {
+            fanType: "Powerfoil X",
+            power: true,
+            commandedSpeedPercent: 10.0,
+            actualSpeedPercent: 10.0,
+            isForward: true,
+            resetFaults: false,
+            autoEnable: true,
+            activeFault: "No Fault"
+        },
+        4: {
+            fanType: "Powerfoil X",
+            power: true,
+            commandedSpeedPercent: 10.0,
+            actualSpeedPercent: 10.0,
+            isForward: true,
+            resetFaults: false,
+            autoEnable: true,
+            activeFault: "No Fault"
+        },
+        5: {
+            fanType: "Powerfoil X",
+            power: true,
+            commandedSpeedPercent: 10.0,
+            actualSpeedPercent: 10.0,
+            isForward: true,
+            resetFaults: false,
+            autoEnable: true,
+            activeFault: "No Fault"
+        },
+        6: {
+            fanType: "Powerfoil X",
+            power: true,
+            commandedSpeedPercent: 10.0,
+            actualSpeedPercent: 10.0,
+            isForward: true,
+            resetFaults: false,
+            autoEnable: true,
+            activeFault: "No Fault"
+        },
+        7: {
+            fanType: "Powerfoil X",
+            power: true,
+            commandedSpeedPercent: 10.0,
+            actualSpeedPercent: 10.0,
+            isForward: true,
+            resetFaults: false,
+            autoEnable: true,
+            activeFault: "No Fault"
+        },
+        8: {
+            fanType: "Powerfoil X",
+            power: true,
+            commandedSpeedPercent: 10.0,
+            actualSpeedPercent: 10.0,
+            isForward: true,
+            resetFaults: false,
+            autoEnable: true,
+            activeFault: "No Fault"
+        }
+    }
+}
 
 // Publish event topic
 // const publishEvent = (type, message, value) => {
@@ -85,42 +152,30 @@ const decreaseTemperature = () => {
 
 // Run and publish telemetry topic
 const run = () => {
-    // switch (powerStatus) {
-    //     case 'OFF': {
-    //         actualTemperature = randomTemperature();
-    //         break;
-    //     }
-    //     case 'AC': {
-    //         actualTemperature = decreaseTemperature();
-    //         break;
-    //     }
-    //     case 'HEAT': {
-    //         actualTemperature = increaseTemperature();
-    //         break;
-    //     }
-    // }
-
-    // TODO: Add fan attributes to message
     let currentTime = moment();
-    let message = JSON.stringify({
+
+    let context = {
         createdAt: currentTime.format(),
         deviceId: thingName,
-        actualTemperature: actualTemperature,
         sentAt: currentTime.format(),
         timestamp: currentTime.valueOf()
+    }
+
+    let message = JSON.stringify({
+        ...context,
+        ...controllerState
     });
     device.publish(telemetryTopic, message);
-    console.log('Telemetry published '.gray + getColoredText(actualTemperature, message) + ' to AWS IoT Telemetry.'.gray);
+    console.log('Telemetry published '.gray + message.white + ' to AWS IoT Telemetry.'.gray);
 }
 
 // Report state
-// TODO: Change the reportedState to have fan attributes
 const reportState = () => {
     try {
         let stateObject = {
             state: {
                 reported: {
-                    actualTemperature: actualTemperature,
+                    ...controllerState
                 }
             }
         };
@@ -136,6 +191,10 @@ const reportState = () => {
 console.log('Connecting to AWS IoT...'.blue);
 
 // Connect
+// TODO: If we are connecting for a second time, we should be able to get
+// the whole document.  This will include the last thing we reported, the desired state,
+// and the delta.  This allows us to "catch up" with changes when we reconnect.
+// See https://github.com/aws/aws-iot-device-sdk-js/issues/100 for more.
 device.on('connect', function () {
     console.log('Connected to AWS IoT.'.blue);
     device.register(thingName, {}, function () {
@@ -143,7 +202,7 @@ device.on('connect', function () {
         let stateObject = {
             state: {
                 desired: {
-                    actualTemperature: actualTemperature,
+                    ...controllerState
                 }
             }
         };
@@ -197,45 +256,16 @@ device.on('status', function (thingName, stat, clientToken, stateObject) {
 });
 
 // Get delta, and change state
+// TODO: What does this look like?  Apply the changes
 device.on('delta', function (thingName, stateObject) {
+    console.log(
+        `Delta recieved for ${thingName}: `.gray,
+        JSON.stringify(stateObject)
+    );
+
     let change = false;
     try {
-        // TODO: Switch this to simulate fans
-        // if (stateObject.state.powerStatus !== undefined
-        //     && stateObject.state.powerStatus !== powerStatus) {
-        //     console.log(`Reported powerStatus state different from remote state, current: ${powerStatus},
-        //          desired: ${stateObject.state.powerStatus}.`.green);
 
-        //     powerStatus = stateObject.state.powerStatus;
-        //     switch (powerStatus) {
-        //         case 'OFF': {
-        //             console.log('The device is OFF.'.green);
-        //             break;
-        //         }
-        //         case 'AC': {
-        //             console.log('AC is ON.'.blue);
-        //             break;
-        //         }
-        //         case 'HEAT': {
-        //             console.log('HEAT is ON.'.red);
-        //             break;
-        //         }
-        //     }
-        //     change = true;
-
-        //     publishEvent('info', 'Power status is changed by user', powerStatus);
-        // }
-
-        // if (stateObject.state.targetTemperature !== undefined
-        //     && parseFloat(stateObject.state.targetTemperature) !== targetTemperature) {
-        //     console.log(`The target temperature different from remote state, current: ${targetTemperature},
-        //         desired: ${stateObject.state.targetTemperature}.`.green);
-
-        //     targetTemperature = parseFloat(stateObject.state.targetTemperature);
-        //     change = true;
-
-        //     publishEvent('info', 'Target temperature is changed by user', targetTemperature);
-        // }
 
         if (change) {
             flag = true;
