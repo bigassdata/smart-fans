@@ -32,3 +32,6 @@
 # CDK Configuration
 **/cdk.out
 **/cdk.staging
+
+# Ignore contents of all certs folders
+**/certs
