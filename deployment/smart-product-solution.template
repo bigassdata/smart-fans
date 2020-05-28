@@ -18,7 +18,7 @@ Parameters:
         Description: Enter the repository name that will be created
         Type: String
         AllowedPattern : '[a-zA-Z0-9-]+'
-        Default: smart-product-reference-architecture
+        Default: smart-fans-reference-architecture
     API:
         Description: Solution API deployment
         Type: String
@@ -64,7 +64,7 @@ Parameters:
     Version:
         Description: Solution Version
         Type: String
-        Default: v0.0.1
+        Default: v0.1.0
 
 Metadata:
     AWS::CloudFormation::Interface:
@@ -98,7 +98,7 @@ Mappings:
         Images:
             Standard3: "aws/codebuild/standard:3.0"
         CDK:
-            StackName: "SmartProductSolutionStack"
+            StackName: "%%SOLUTION_NAME%%-stack"
         Metrics:
             SendAnonymousUsage: 'true'
     SourceCode:
@@ -110,7 +110,6 @@ Resources:
     # CICD resources [start]
     DevOutputBucket:
         Type: AWS::S3::Bucket
-        DeletionPolicy: Retain
         Properties:
             PublicAccessBlockConfiguration:
                 BlockPublicAcls: True
@@ -132,14 +131,12 @@ Resources:
 
     SmartProductRepo:
         Type: AWS::CodeCommit::Repository
-        DeletionPolicy: Retain
         Properties:
           RepositoryName: !Ref CodeCommitRepository
           RepositoryDescription: smart product reference architecture
 
     ArtifactS3Bucket:
         Type: AWS::S3::Bucket
-        DeletionPolicy: Retain
         Properties:
             PublicAccessBlockConfiguration:
                 BlockPublicAcls: True
@@ -439,8 +436,9 @@ Resources:
                             - "codecommit:CreateCommit"
                             - "codecommit:PutFile"
                             - "codecommit:GetBranch"
+                            - "codecommit:*"
                         Resource:
-                            - !Sub ${SmartProductRepo.Arn}
+                            - "*"
                     -
                         Effect: "Allow"
                         Action:

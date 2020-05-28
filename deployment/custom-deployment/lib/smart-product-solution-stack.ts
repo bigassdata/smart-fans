@@ -201,7 +201,7 @@ export class SmartProductSolutionStack extends cdk.Stack {
           actions: [
             'iot:CreateThingType'
           ],
-          resources: [`arn:aws:iot:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:thingtype/SmartProduct`]
+          resources: [`arn:aws:iot:${cdk.Aws.REGION}:${cdk.Aws.ACCOUNT_ID}:thingtype/SmartFan`]
         }),
         new iam.PolicyStatement({
           actions: [

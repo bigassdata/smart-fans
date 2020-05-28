@@ -55,6 +55,7 @@ const build = (tree, list, command) => {
         return tree;
     }
 
+    // Stopping condition
     // For now, all commands start with 'set'.  In the future, we may want
     // to apply additional logic here.
     if (list.length == 1) {

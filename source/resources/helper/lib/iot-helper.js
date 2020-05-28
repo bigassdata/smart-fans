@@ -341,7 +341,7 @@ class iotHelper {
     });
 
     let params = {
-      thingTypeName: 'SmartProduct',
+      thingTypeName: 'SmartFan',
       thingTypeProperties: {
         searchableAttributes: [
           'deviceName',
