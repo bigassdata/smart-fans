@@ -12,8 +12,3 @@ certs
 
 # System Files
 **/.DS_Store
-
-# Outputs device information to this folder.
-# Includes sensitive information
-devices/**
-.env

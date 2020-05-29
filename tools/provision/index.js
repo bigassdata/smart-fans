@@ -8,7 +8,10 @@ const exec = util.promisify(require('child_process').exec);
 const chalk = require('chalk');
 const symbol = require('log-symbols');
 let log = console.log;
+const path = require('path');
 
+
+const devicePath = path.resolve('..', 'devices');
 /*****************************************
  *   Default Model and Device Details    *
  *****************************************/
@@ -41,30 +44,35 @@ let device = {
     details: DETAILS
 };
 
-// Lookup the ATS endpoint and create the .env file
-iot.describeEndpoint({ endpointType: "iot:Data-ATS" }).promise()
-    .then((data) => {
-        return createDotEnv(data.endpointAddress, serialNumber);
-    }).then(() => {
-        log(chalk.green(symbol.success, 'Create .env for the simulator'));
-    }).catch(err => console.error(chalk.redBright(symbol.error, 'Error creating .env file', err)));
 
 const deviceDir = makeDeviceDirectory(serialNumber);
 log(chalk.green(symbol.success, 'Create a device directory'));
 
 createCSRConfig(serialNumber);
-// Call createCert.sh <uuid>
-exec(`./createCert.sh ${serialNumber}`)
+
+let iotEndpoint = '';
+// Lookup the ATS endpoint and create the .env file
+iot.describeEndpoint({ endpointType: "iot:Data-ATS" }).promise()
+    .then((data) => {
+        iotEndpoint = data.endpointAddress;
+        log(chalk.green(symbol.success, 'Create .env for the simulator'));
+        createDotEnv(data.endpointAddress, serialNumber, MODEL);
+    }).then(
+        () => {
+            console.log(`./createCert.sh ${serialNumber} ${iotEndpoint}`);
+            return exec(`./createCert.sh ${serialNumber} ${iotEndpoint}`);
+        }
+    )
     .then(({ stdout, stderr }) => {
-        // console.log(chalk.inverse('[createCert]' + stdout));
-        // console.log(chalk.green.bgWhite('[createCert]' + stderr));
+        log(chalk.gray(stdout));
+        log(chalk.yellow(stderr));
         log(chalk.green(symbol.success, 'Create a certificate signing request'));
         log(chalk.green(symbol.success, 'Create a device certificate file'));
     })
-    .then(
+    .then(() => {
         // Save a copy of the device information
-        fs.writeFile(`./devices/${serialNumber}/device.json`, JSON.stringify(device))
-    )
+        return fs.writeFile(path.join(devicePath, serialNumber, 'device.json'), JSON.stringify(device));
+    })
     .then(() => {
         log(chalk.green(symbol.success, 'Create a copy of the device information on disk'))
     })
@@ -84,12 +92,12 @@ exec(`./createCert.sh ${serialNumber}`)
         log(`Model Number: ${chalk.bold(MODEL)}`);
         log("=".repeat(105));
         log("Cert package for the device");
-        log(`${process.cwd()}/devices/${serialNumber}/certs.tar.gz`);
+        log(`${path.join(devicePath, serialNumber, 'certs.tar.gz')}`);
     })
     .catch((reason) => console.error(chalk.red(reason)));
 
 async function makeDeviceDirectory(serialNumber) {
-    return await fs.mkdir(`./devices/${serialNumber}`);
+    return await fs.mkdir(path.join(devicePath, serialNumber));
 
 }
 
@@ -98,15 +106,16 @@ async function makeDeviceDirectory(serialNumber) {
  * @param {string} endpoint - AWS IoT endpoint
  * @param {string} serialNumber - Serial Number (uuid)
  */
-async function createDotEnv(endpoint, serialNumber) {
+async function createDotEnv(endpoint, serialNumber, modelNumber) {
     let dotEnvTemplate = await fs.readFile('./templates/dotenv.mustache', 'utf8');
     var dotEnv = Mustache.render(
         dotEnvTemplate,
         {
             serialNumber: serialNumber,
-            iotEndpoint: endpoint
+            iotEndpoint: endpoint,
+            modelNumber: modelNumber
         });
-    await fs.writeFile(`./devices/${serialNumber}/.env`, dotEnv);
+    await fs.writeFile(path.join(devicePath, serialNumber, '.env'), dotEnv);
 }
 
 /**
@@ -121,5 +130,5 @@ async function createCSRConfig(serialNumber) {
             serialNumber: serialNumber,
             organization: "Big Ass Fans"
         });
-    await fs.writeFile(`./devices/${serialNumber}/csr.cnf`, cnf);
+    await fs.writeFile(path.join(devicePath, serialNumber, 'csr.cnf'), cnf);
 }

@@ -3,8 +3,12 @@
 echo "Generating certs for device: "$1
 
 COMMON_NAME=$1
+IOT_ENDPOINT=$2
+
+echo "IOT Endpoint is "$2
+
 # Device Dir
-DDIR=./devices/${COMMON_NAME}
+DDIR=../devices/${COMMON_NAME}
 CADIR=../certs
 
 # Generate a private key
@@ -35,12 +39,16 @@ tar czvf certs.tar.gz deviceCert.key \
     root.cert
 
 # Use the MQTT Mosquitto client to connect to AWS IoT using the device certificate
+# This returns `Error: The connection was lost.`, however, that is expected.
+# Either ignore this part, or mvoe to node.js to make connection.
+__connect="
 mosquitto_pub --cafile root.cert \
     --cert deviceCertAndCACert.crt \
     --key deviceCert.key \
-    -h <prefix>-ats.iot.us-east-1.amazonaws.com \
+    -h ${IOT_ENDPOINT} \
     -p 8883 -q 1 -t foo/bar \
     -i anyclientID --tls-version tlsv1.2 \
-    -m "Hello" -d
+    -m 'Hello' -d
+"
+# echo "$__connect"
 
-rm root.cert

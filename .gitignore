@@ -35,3 +35,8 @@
 
 # Ignore contents of all certs folders
 **/certs
+
+# Provision outputs device information to this folder.
+# Includes sensitive information
+devices
+.env
