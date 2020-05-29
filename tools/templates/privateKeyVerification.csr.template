@@ -29,9 +29,9 @@ req_extensions		= v3_req
 
 countryName=		    US
 stateOrProvinceName=	Kentucky
-localityName=		    My Town
-organizationName=	    Some Organisation
-organizationalUnitName=	Some Department
+localityName=		    Lexington
+organizationName=	    Big Ass Fans
+organizationalUnitName=	IT
 commonName=	            {{REG_CODE}}
 emailAddress=		    admin@example.com
 

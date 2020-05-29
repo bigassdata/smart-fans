@@ -9,7 +9,7 @@ const appConfig = config.getAppConfig();
 const thingName = appConfig.thingName;
 const telemetryTopic = `${config.telemetryTopic}/${thingName}`;
 const eventTopic = `${config.eventTopic}/${thingName}`;
-const commandTopic = `smartproduct/commands/${thingName}`;
+const commandTopic = `smartfans/commands/${thingName}`;
 console.log(`Shadow Params : ${JSON.stringify(config.getShadowParams())}`)
 const device = awsIot.thingShadow(config.getShadowParams());
 
@@ -17,9 +17,9 @@ const temperatureChange = appConfig.temperatureChange;
 const publishInterval = appConfig.publishInterval;
 const statusInterval = appConfig.statusInterval;
 
-let powerStatus = 'OFF';    // OFF, AC, HEAT
 let actualTemperature = 71.5;
-let targetTemperature = 71.5;
+let autoIdealTemperature = 71.5;
+let targetTemperature = 69.0;
 let flag = false;
 let clientToken;
 
@@ -64,6 +64,7 @@ const getColoredText = (temperature, data) => {
 
 // Publish event topic
 const publishEvent = (type, message, value) => {
+    return; // Disable publishing
     let currentTime = moment();
     let event = {
         deviceId: thingName,
@@ -86,27 +87,27 @@ const publishEvent = (type, message, value) => {
 
 // Run and publish telemetry topic
 const run = () => {
-    switch (powerStatus) {
-        case 'OFF': {
-            actualTemperature = randomTemperature();
-            break;
-        }
-        case 'AC': {
-            actualTemperature = decreaseTemperature();
-            break;
-        }
-        case 'HEAT': {
-            actualTemperature = increaseTemperature();
-            break;
-        }
-    }
+    // switch (powerStatus) {
+    //     case 'OFF': {
+    //         actualTemperature = randomTemperature();
+    //         break;
+    //     }
+    //     case 'AC': {
+    //         actualTemperature = decreaseTemperature();
+    //         break;
+    //     }
+    //     case 'HEAT': {
+    //         actualTemperature = increaseTemperature();
+    //         break;
+    //     }
+    // }
 
+    // TODO: Add fan attributes to message
     let currentTime = moment();
     let message = JSON.stringify({
         createdAt: currentTime.format(),
         deviceId: thingName,
         actualTemperature: actualTemperature,
-        targetTemperature: targetTemperature,
         sentAt: currentTime.format(),
         timestamp: currentTime.valueOf()
     });
@@ -115,14 +116,13 @@ const run = () => {
 }
 
 // Report state
+// TODO: Change the reportedState to have fan attributes
 const reportState = () => {
     try {
         let stateObject = {
             state: {
                 reported: {
-                    powerStatus: powerStatus,
                     actualTemperature: actualTemperature,
-                    targetTemperature: targetTemperature,
                 }
             }
         };
@@ -141,12 +141,11 @@ console.log('Connecting to AWS IoT...'.blue);
 device.on('connect', function () {
     console.log('Connected to AWS IoT.'.blue);
     device.register(thingName, {}, function () {
+        // TODO: Set Initial State
         let stateObject = {
             state: {
                 desired: {
-                    powerStatus: powerStatus,
                     actualTemperature: actualTemperature,
-                    targetTemperature: targetTemperature,
                 }
             }
         };
@@ -203,41 +202,42 @@ device.on('status', function (thingName, stat, clientToken, stateObject) {
 device.on('delta', function (thingName, stateObject) {
     let change = false;
     try {
-        if (stateObject.state.powerStatus !== undefined
-            && stateObject.state.powerStatus !== powerStatus) {
-            console.log(`Reported powerStatus state different from remote state, current: ${powerStatus},
-                 desired: ${stateObject.state.powerStatus}.`.green);
+        // TODO: Switch this to simulate fans
+        // if (stateObject.state.powerStatus !== undefined
+        //     && stateObject.state.powerStatus !== powerStatus) {
+        //     console.log(`Reported powerStatus state different from remote state, current: ${powerStatus},
+        //          desired: ${stateObject.state.powerStatus}.`.green);
 
-            powerStatus = stateObject.state.powerStatus;
-            switch (powerStatus) {
-                case 'OFF': {
-                    console.log('The device is OFF.'.green);
-                    break;
-                }
-                case 'AC': {
-                    console.log('AC is ON.'.blue);
-                    break;
-                }
-                case 'HEAT': {
-                    console.log('HEAT is ON.'.red);
-                    break;
-                }
-            }
-            change = true;
+        //     powerStatus = stateObject.state.powerStatus;
+        //     switch (powerStatus) {
+        //         case 'OFF': {
+        //             console.log('The device is OFF.'.green);
+        //             break;
+        //         }
+        //         case 'AC': {
+        //             console.log('AC is ON.'.blue);
+        //             break;
+        //         }
+        //         case 'HEAT': {
+        //             console.log('HEAT is ON.'.red);
+        //             break;
+        //         }
+        //     }
+        //     change = true;
 
-            publishEvent('info', 'Power status is changed by user', powerStatus);
-        }
+        //     publishEvent('info', 'Power status is changed by user', powerStatus);
+        // }
 
-        if (stateObject.state.targetTemperature !== undefined
-            && parseFloat(stateObject.state.targetTemperature) !== targetTemperature) {
-            console.log(`The target temperature different from remote state, current: ${targetTemperature},
-                desired: ${stateObject.state.targetTemperature}.`.green);
+        // if (stateObject.state.targetTemperature !== undefined
+        //     && parseFloat(stateObject.state.targetTemperature) !== targetTemperature) {
+        //     console.log(`The target temperature different from remote state, current: ${targetTemperature},
+        //         desired: ${stateObject.state.targetTemperature}.`.green);
 
-            targetTemperature = parseFloat(stateObject.state.targetTemperature);
-            change = true;
+        //     targetTemperature = parseFloat(stateObject.state.targetTemperature);
+        //     change = true;
 
-            publishEvent('info', 'Target temperature is changed by user', targetTemperature);
-        }
+        //     publishEvent('info', 'Target temperature is changed by user', targetTemperature);
+        // }
 
         if (change) {
             flag = true;
@@ -248,3 +248,4 @@ device.on('delta', function (thingName, stateObject) {
         console.log('Error:', err);
     }
 });
+
