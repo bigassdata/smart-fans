@@ -151,10 +151,12 @@ exports.handler = async (event, context, callback) => {
         }
 
         /**
-         * Creates a default thing type.
+         * Create thing types.
+         * TODO: Create Additional Thing Types here.
          */
         try {
-          await _iotHelper.createThingType();
+          await _iotHelper.createThingType('SmartProduct'); // Default Thing Type
+          await _iotHelper.createThingType('SimulatedFan');
         } catch (error) {
           console.error('An error occurred while creating a thing type.', error);
           throw Error(error);

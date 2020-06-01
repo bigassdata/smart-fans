@@ -23,6 +23,8 @@ const AWS = require('aws-sdk');
 const _ = require('underscore');
 const UsageMetrics = require('usage-metrics');
 
+const getThingType = require('./getThingType');
+
 /**
  * Performs device registration actions, such as, creating and retrieving device registration information.
  *
@@ -350,6 +352,8 @@ class Registration {
       };
 
       // TODO: Good place to relate modelNumber to a Thing Type,
+      let thingType = getThingType(registration.modelNumber);
+
       // instead of having a single type.
       const params = {
         thingName: registration.deviceId,
@@ -357,7 +361,7 @@ class Registration {
           attributes: _payload,
           merge: true,
         },
-        thingTypeName: process.env.THING_TYPE,
+        thingTypeName: thingType,
       };
 
       await iot.createThing(params).promise();

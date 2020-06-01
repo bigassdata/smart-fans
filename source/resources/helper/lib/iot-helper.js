@@ -325,7 +325,7 @@ class iotHelper {
   /**
    * Creates a default thing type
    */
-  async createThingType() {
+  async createThingType(thingTypeName) {
     Logger.log(
       Logger.levels.ROBUST,
       `iotHelper - createThingType`
@@ -340,9 +340,8 @@ class iotHelper {
       region: process.env.AWS_REGION,
     });
 
-    // TODO: Create Addtional thingtypes here
     let params = {
-      thingTypeName: 'SmartProduct',
+      thingTypeName: thingTypeName,
       thingTypeProperties: {
         searchableAttributes: [
           'deviceName',
