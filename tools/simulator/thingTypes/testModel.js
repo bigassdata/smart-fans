@@ -140,25 +140,6 @@ class HVAC extends Device {
         }
     }
 
-    /**
-     * Override to publish the device state.
-     *
-     * @example
-     * clientToken = this.device.update(this.serialNumber, stateObject);
-     */
-    reportState() {
-        let clientToken;
-        try {
-            let stateObject = this.getCurrentState();
-            clientToken = this.device.update(this.serialNumber, stateObject);
-            if (clientToken === null) {
-                console.log('ERROR: Reporting state failed, operation still in progress'.red);
-            }
-        } catch (err) {
-            console.error('ERROR: Unknown error reporting state.'.red, err);
-        }
-    }
-
     getCurrentState() {
         return {
             state: {

@@ -33,6 +33,11 @@ class Device {
      * - crt file e.g. deviceCertAndCACert.crt
      * - CA cert e.g. root.cert
      *
+     * Methods to override in subsclasses
+     * - run - Publish to telemetry and trigger events
+     * - onChange - Logic when changes are published to shadow
+     * - getCurrentState - Provide device state for reporting to the cloud.
+     *
      * @param {String} path - the directory with the required device files
      */
     constructor(path, properties) {
@@ -236,14 +241,19 @@ class Device {
         }
     }
 
+    /**
+     * Occurs when changes are added to the device shadow
+     * @param {*} thingName
+     * @param {*} stateObject
+     */
     onDelta(thingName, stateObject) {
         let isDirty = false;
         try {
-            isDirty = onChange(stateObject.state);
+            isDirty = this.onChange(stateObject.state);
             // Set the device flag to publish command success
             if (isDirty) this.hasChanged = true;
         } catch (err) {
-            publishEvent('diagnostic', `An error occurred ${JSON.stringify(err)}`);
+            this.publishEvent('diagnostic', `An error occurred ${JSON.stringify(err)}`);
             console.log('ERROR to set shadow.'.red);
             console.log('Error:', err);
         }
@@ -259,12 +269,20 @@ class Device {
         return false;
     }
 
-    // Run and publish telemetry topic
+
+    /**
+     * Add logic to report telemetry data and trigger
+     * events here.
+     */
     run() {
         return;
     }
 
-    // override to provide initial state when registered
+    /**
+     * Return the current state of the device.  This is used
+     * to provide initial state (on `register` event), and
+     * to report device state on regular intervals.
+     */
     getCurrentState() {
         return {};
     }
@@ -276,7 +294,16 @@ class Device {
      * clientToken = this.device.update(this.serialNumber, stateObject);
      */
     reportState() {
-        return;
+        let clientToken;
+        try {
+            let stateObject = this.getCurrentState();
+            clientToken = this.device.update(this.serialNumber, stateObject);
+            if (clientToken === null) {
+                console.log('ERROR: Reporting state failed, operation still in progress'.red);
+            }
+        } catch (err) {
+            console.error('ERROR: Unknown error reporting state.'.red, err);
+        }
     }
 }
 
