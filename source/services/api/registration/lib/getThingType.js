@@ -3,7 +3,7 @@
 let lookup =
 {
     'test-model': 'SmartProduct',
-    'sim-fan': 'SimulatedFan'
+    'sim-controller': 'SimController'
 }
 
 function getThingType(modelNumber) {

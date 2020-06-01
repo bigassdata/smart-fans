@@ -16,14 +16,23 @@ const devicePath = path.resolve('..', 'devices');
  *   Default Model and Device Details    *
  *****************************************/
 
-const MODEL = 'test-model';
-const DETAILS = {
-    model: "INFINITY 19 HEAT PUMP",
-    capacity: "2-5 ton",
-    requirement: "208-230 V",
-    coolingEfficiency: "Up to 19 SEER",
-    heatingEfficiency: "Up to 10 HSPF"
+const MODEL = 'sim-controller';
+const DETAILS_LOOKUP = {
+    'test-model': {
+        model: "INFINITY 19 HEAT PUMP",
+        capacity: "2-5 ton",
+        requirement: "208-230 V",
+        coolingEfficiency: "Up to 19 SEER",
+        heatingEfficiency: "Up to 10 HSPF"
+    },
+    'sim-controller': {
+        model: "Big Ass Fans Simulated Controller",
+        mfgYear: "2020"
+    }
 };
+
+let model = MODEL;
+let details = DETAILS_LOOKUP[MODEL];
 
 /*****************************************/
 
@@ -40,8 +49,8 @@ log(chalk.green(symbol.success, 'Generate a UUID for the serial number'));
 
 let device = {
     deviceId: serialNumber,
-    modelNumber: MODEL,
-    details: DETAILS
+    modelNumber: model,
+    details: details
 };
 
 
@@ -56,7 +65,7 @@ iot.describeEndpoint({ endpointType: "iot:Data-ATS" }).promise()
     .then((data) => {
         iotEndpoint = data.endpointAddress;
         log(chalk.green(symbol.success, 'Create .env for the simulator'));
-        createDotEnv(data.endpointAddress, serialNumber, MODEL);
+        createDotEnv(data.endpointAddress, serialNumber, model);
     }).then(
         () => {
             console.log(`./createCert.sh ${serialNumber} ${iotEndpoint}`);
@@ -89,7 +98,7 @@ iot.describeEndpoint({ endpointType: "iot:Data-ATS" }).promise()
         log(chalk.bold.inverse(`Device Information`));
         log("=".repeat(105));
         log(`Serial Number: ${chalk.bold(serialNumber)}`);
-        log(`Model Number: ${chalk.bold(MODEL)}`);
+        log(`Model Number: ${chalk.bold(model)}`);
         log("=".repeat(105));
         log("Cert package for the device");
         log(`${path.join(devicePath, serialNumber, 'certs.tar.gz')}`);
