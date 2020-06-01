@@ -140,9 +140,17 @@ class HVAC extends Device {
         }
     }
 
+    /**
+     * Clear desired state and set reported state
+     */
     getCurrentState() {
         return {
             state: {
+                desired: {
+                    powerStatus: null,
+                    actualTemperature: null,
+                    targetTemperature: null,
+                },
                 reported: {
                     powerStatus: this.powerStatus,
                     actualTemperature: this.actualTemperature,
