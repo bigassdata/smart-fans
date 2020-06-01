@@ -197,6 +197,7 @@ export class SmartProductSolutionStack extends cdk.Stack {
           ],
           resources: ['*']
         }),
+        // TODO: Add permissions for additional thing types here
         new iam.PolicyStatement({
           actions: [
             'iot:CreateThingType'

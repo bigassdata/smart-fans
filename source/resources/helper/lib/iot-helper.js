@@ -340,6 +340,7 @@ class iotHelper {
       region: process.env.AWS_REGION,
     });
 
+    // TODO: Create Addtional thingtypes here
     let params = {
       thingTypeName: 'SmartProduct',
       thingTypeProperties: {

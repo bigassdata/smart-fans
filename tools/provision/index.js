@@ -98,7 +98,6 @@ iot.describeEndpoint({ endpointType: "iot:Data-ATS" }).promise()
 
 async function makeDeviceDirectory(serialNumber) {
     return await fs.mkdir(path.join(devicePath, serialNumber));
-
 }
 
 /**

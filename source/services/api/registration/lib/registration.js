@@ -125,7 +125,7 @@ class Registration {
    * @param {JSON} registration - device registration object
    */
   async createRegistration(ticket, registration) {
-    const {deviceId, deviceName, modelNumber} = registration;
+    const { deviceId, deviceName, modelNumber } = registration;
     let docClient = new AWS.DynamoDB.DocumentClient(this.dynamoConfig);
     let errors = [
       'DeviceNotFoundFailure',
@@ -147,7 +147,7 @@ class Registration {
             modelNumber}". Please add a model number/serial number that is supported by the manufacturer.`
         });
       }
-      let {details} = reference.Item;
+      let { details } = reference.Item;
 
       // 2. Checks if the device is already registered.
       let isDeviceRegistered = await this._isDeviceRegistered(deviceId);
@@ -349,6 +349,8 @@ class Registration {
         modelNumber: registration.modelNumber /* required */,
       };
 
+      // TODO: Good place to relate modelNumber to a Thing Type,
+      // instead of having a single type.
       const params = {
         thingName: registration.deviceId,
         attributePayload: {

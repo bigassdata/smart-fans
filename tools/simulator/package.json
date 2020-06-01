@@ -2,9 +2,10 @@
     "name": "smart-product-demo-simulator",
     "version": "0.0.1",
     "description": "Smart Product Demo Simulator",
-    "main": "simulator.js",
+    "main": "index.js",
     "scripts": {
-        "start": "node simulator.js"
+        "start": "node index.js",
+        "debug": "node --inspect-brk=9229 index.js"
     },
     "dependencies": {
         "aws-iot-device-sdk": "^2.2",

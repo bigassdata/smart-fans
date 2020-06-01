@@ -6,7 +6,7 @@ function getAppConfig() {
         throw result.error;
     }
 
-    const serialNumber = result.parsed.SERIALNUMBER;
+    const serialNumber = result.parsed.SERIAL_NUMBER;
 
     return {
         thingName: serialNumber,
@@ -24,7 +24,7 @@ function getShadowParams() {
         throw result.error;
     }
 
-    const serialNumber = result.parsed.SERIALNUMBER;
+    const serialNumber = result.parsed.SERIAL_NUMBER;
     const host = result.parsed.IOT_HOST;
 
     return {
