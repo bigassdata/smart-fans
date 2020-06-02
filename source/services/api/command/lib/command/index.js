@@ -20,10 +20,11 @@
 const Logger = require('logger');
 const moment = require('moment');
 const AWS = require('aws-sdk');
-const _ = require('underscore');
+const _ = require('lodash');
 const uuidv4 = require('uuid/v4');
 const UsageMetrics = require('usage-metrics');
 const CommonUtils = require('utils');
+const CommandStrategy = require('./commandStrategy');
 
 /**
  * Performs command actions for a user, such as, retrieving and logging device command information.
@@ -133,7 +134,7 @@ class Command {
         try {
           let data = await this._getCommandsPage(deviceId, lastevalkey, commandStatus, length);
           commands = [...commands, ...data.Items];
-        result.LastEvaluatedKey = data.LastEvaluatedKey;
+          result.LastEvaluatedKey = data.LastEvaluatedKey;
         } catch (err) {
           return Promise.reject(err);
         }
@@ -169,9 +170,11 @@ class Command {
 
     const docClient = new AWS.DynamoDB.DocumentClient(this.dynamoConfig);
     try {
+      // Change to get Registration information.  Need model-number to validate
+      // the command based on the type of the device.
       let validRegistration = await this._validateUserDeviceRegistration(
         deviceId,
-        ticket.sub
+        ticket.subs
       );
 
       if (validRegistration) {
@@ -212,77 +215,59 @@ class Command {
 
   /**
    * Creates a device command for user.
+   *
+   * Note that it validates registration of the device first in
+   * order to determine modelNumber.  This is used to determine
+   * the appropriate command structure.
+   *
    * @param {JSON} ticket - authentication ticket
    * @param {string} deviceId - id of device to retrieve
    * @param {JSON} command - device command object
+   *
+   *
+   * CommandStrategy
+   * - validate (return true/false)
+   * - getDetails - get the command Details
+   * - getShadowDetails - get the shadow update object
    */
   async createCommand(ticket, deviceId, command) {
-    const commandModes = ['set-temp', 'set-mode'];
-    const powerStatuses = ['HEAT', 'AC', 'OFF'];
 
-    /**
-     * The solution is for HVAC devices, and this will suppose the command JSON would contain below keys and values.
-     * command {
-     *   commandDetails: {
-     *     command: "set-temp" | "set-mode",
-     *     value: number | "HEAT" | "AC" | "OFF"
-     *   },
-     *   shadowDetails: {
-     *     powerStatus: "HEAT" | "AC" | "OFF",
-     *     actualTemperature: number,
-     *     targetTemperature: number
-     *   }
-     * }
-     * command.commandDetails are for DynamoDB item, and command.shadowDetails are for sending data to device.
-     */
-    let isCommandValid = true;
-    if (command.commandDetails === undefined
-      || command.shadowDetails === undefined
-      || commandModes.indexOf(command.commandDetails.command) < 0
-      || powerStatuses.indexOf(command.shadowDetails.powerStatus) < 0
-      || isNaN(command.shadowDetails.targetTemperature)
-      || command.shadowDetails.targetTemperature < 50
-      || command.shadowDetails.targetTemperature > 110) {
-      isCommandValid = false
-    } else {
-      if (command.commandDetails.command === 'set-temp') {
-        if (isNaN(command.commandDetails.value)) {
-          isCommandValid = false;
-        } else {
-          // Fix temperature precision, only keeps 2 precisions
-          let targetTemperature = parseFloat(command.shadowDetails.targetTemperature).toFixed(2);
-          if (parseInt(targetTemperature.slice(targetTemperature.indexOf('.') + 1)) === 0) {
-            targetTemperature = parseFloat(command.shadowDetails.targetTemperature).toFixed(0);
-          }
-          command.shadowDetails.targetTemperature = targetTemperature;
-          command.commandDetails.value = targetTemperature;
-        }
-      }
-    }
+    let validRegistration = false;
+    let deviceRegistration = null;
 
-    if (!isCommandValid) {
-      return Promise.reject({
-        code: 400,
-        error: 'InvalidParameter',
-        message: 'Body parameters are invalid. Please check the API specification.'
-      });
-    }
-
-    let docClient = new AWS.DynamoDB.DocumentClient(this.dynamoConfig);
     try {
-      let validRegistration = await this._validateUserDeviceRegistration(
+      deviceRegistration = await this._getUserDeviceRegistration(
         deviceId,
         ticket.sub
       );
+
+      validRegistration = !_.isEmpty(deviceRegistration);
+
       if (validRegistration) {
+
+        let modelNumber = _.get(deviceRegistration, 'Item.modelNumber', null);
+        if (!modelNumber) {
+          throw new Error(`Invalid registration record.  No modelNumber for ${deviceId}`);
+        }
+
+        let commandStrategy = CommandStrategy(modelNumber, command);
+        let isCommandValid = commandStrategy.validate();
+
+        if (!isCommandValid) {
+          return Promise.reject({
+            code: 400,
+            error: 'InvalidParameter',
+            message: 'Body parameters are invalid. Please check the API specification.'
+          });
+        }
+
+        let docClient = new AWS.DynamoDB.DocumentClient(this.dynamoConfig);
+
         let _command = {
           commandId: uuidv4(),
           deviceId: deviceId,
           status: 'pending',
-          details: {
-            command: command.commandDetails.command,
-            value: command.commandDetails.value
-          },
+          details: commandStrategy.getDetails(),
           userId: ticket.sub,
           createdAt: moment().utc().format(),
           updatedAt: moment().utc().format(),
@@ -295,11 +280,8 @@ class Command {
 
         await docClient.put(params).promise();
 
-        let shadowDetails = {
-          powerStatus: command.shadowDetails.powerStatus,
-          actualTemperature: command.shadowDetails.actualTemperature,
-          targetTemperature: command.shadowDetails.targetTemperature
-        }
+        let shadowDetails = commandStrategy.getShadowDetails();
+
         await this.shadowUpdate(_command, shadowDetails); //best practise to update device shadow
         await this.publishCommand(_command, shadowDetails); //publish on IoT topic for the device
 
@@ -354,6 +336,8 @@ class Command {
    * Updates device shadow with desired state
    * @param {JSON} command - device command object
    * @param {JSON} shadowDetails - shadow detail object
+   *
+   * TODO: Specific to ThingType?
    */
   async shadowUpdate(command, shadowDetails) {
     try {
@@ -369,7 +353,7 @@ class Command {
         apiVersion: '2015-05-28',
       });
       const _shadow = await iotdata
-        .getThingShadow({thingName: _deviceId})
+        .getThingShadow({ thingName: _deviceId })
         .promise();
       Logger.log(
         Logger.levels.ROBUST,
@@ -400,7 +384,7 @@ class Command {
       Logger.error(
         Logger.levels.INFO,
         `[DeviceShadowUpdateFailure] Error occurred while attempting to update device shadow for command ${
-          command.deviceId
+        command.deviceId
         }.`
       );
       return Promise.reject({
@@ -461,23 +445,18 @@ class Command {
     }
   }
 
-  /**
-   * Validates device is registered to user.
-   * @param {string} deviceId - id of device to retrieve
-   * @param {string} userId - id of the user to retrieve
-   */
-  async _validateUserDeviceRegistration(deviceId, userId) {
-    let params = {
-      TableName: process.env.REGISTRATION_TBL,
-      Key: {
-        userId: userId,
-        deviceId: deviceId,
-      },
-    };
 
-    const docClient = new AWS.DynamoDB.DocumentClient(this.dynamoConfig);
+  /**
+     * Retrieves device registration information for the user.
+     * @param {string} deviceId - id of device to retrieve
+     * @param {string} userId - id of the user to retrieve
+     */
+  async _validateUserDeviceRegistration(deviceId, userId) {
+    let data = null;
     try {
-      let data = await docClient.get(params).promise();
+      data = await
+        this._getUserDeviceRegistration(deviceId, userId);
+
       if (!_.isEmpty(data)) {
         return Promise.resolve(true);
       } else {
@@ -495,6 +474,28 @@ class Command {
         message: `Error occurred while attempting to retrieve registration information for device "${deviceId}".`,
       });
     }
+  }
+
+
+  /**
+   * Retrieves device registration information for the user.
+   * @param {string} deviceId - id of device to retrieve
+   * @param {string} userId - id of the user to retrieve
+   *
+   * TODO: Catch exceptions/promise rejections
+   */
+  async _getUserDeviceRegistration(deviceId, userId) {
+    let params = {
+      TableName: process.env.REGISTRATION_TBL,
+      Key: {
+        userId: userId,
+        deviceId: deviceId,
+      },
+    };
+
+    const docClient = new AWS.DynamoDB.DocumentClient(this.dynamoConfig);
+    let data = await docClient.get(params).promise();
+    return Promise.resolve(data);
   }
 }
 

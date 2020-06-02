@@ -5,17 +5,17 @@
     "version": "0.0.1",
     "private": true,
     "dependencies": {
+        "authorizer": "file:../../../resources/authorizer/",
         "aws-serverless-express": "^3.3.6",
         "body-parser": "^1.17.1",
-        "express": "^4.15.2",
         "cors": "^2.8.3",
-        "moment": "*",
-        "underscore": "*",
-        "authorizer": "file:../../../resources/authorizer/",
+        "express": "^4.15.2",
+        "lodash": "^4.17.15",
         "logger": "file:../../../resources/logger/",
-        "uuid": "^3.3.2",
+        "moment": "*",
         "usage-metrics": "file:../../../resources/usage-metrics",
-        "utils": "file:../../../resources/utils/"
+        "utils": "file:../../../resources/utils/",
+        "uuid": "^3.3.2"
     },
     "devDependencies": {
         "aws-sdk": "*",
@@ -30,7 +30,7 @@
     },
     "scripts": {
         "pretest": "rm -rf package-lock.json && rm -rf node_modules && npm install",
-        "test": "env AWS_REGION='test' mocha lib/*.spec.js",
+        "test": "env AWS_REGION='test' mocha lib/**/*.spec.js",
         "prestart": "rm -rf package-lock.json && npm install",
         "start": "node index.js",
         "build:init": "rm -rf package-lock.json && rm -rf dist && rm -rf node_modules",

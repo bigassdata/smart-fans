@@ -9,7 +9,7 @@ let path = require('path');
 let AWS = require('aws-sdk-mock');
 AWS.setSDK(path.resolve('./node_modules/aws-sdk'));
 
-let Command = require('./command.js');
+let Command = require('.');
 
 describe('Command', function () {
   const deviceId = '42adad4d-fdd1-4db0-a501-61cffd0fa3e4';
@@ -39,6 +39,16 @@ describe('Command', function () {
     groups: [],
   };
 
+  const mockSuccessRegisteredDevice = callback => {
+    callback(null, {
+      Item: {
+        userId: ticket.sub,
+        deviceId: command.deviceId,
+        modelNumber: 'test-model'
+      }
+    });
+  }
+
   describe('#getCommands', function () {
     beforeEach(function () { });
 
@@ -48,10 +58,7 @@ describe('Command', function () {
 
     it('should return device commands when ddb query successful with valid user', function (done) {
       AWS.mock('DynamoDB.DocumentClient', 'get', function (params, callback) {
-        callback(null, {
-          userId: ticket.sub,
-          deviceId: command.deviceId,
-        });
+        mockSuccessRegisteredDevice(callback);
       });
 
       AWS.mock('DynamoDB.DocumentClient', 'query', function (params, callback) {
@@ -76,10 +83,7 @@ describe('Command', function () {
 
     it('should return device commands for particular LastEvaludatedKey when ddb query successful with valid user', function (done) {
       AWS.mock('DynamoDB.DocumentClient', 'get', function (params, callback) {
-        callback(null, {
-          userId: ticket.sub,
-          deviceId: command.deviceId,
-        });
+        mockSuccessRegisteredDevice(callback);
       });
 
       let _calls = 0;
@@ -105,10 +109,7 @@ describe('Command', function () {
 
     it('should return device commands for specific command status when ddb query successful with valid user', function (done) {
       AWS.mock('DynamoDB.DocumentClient', 'get', function (params, callback) {
-        callback(null, {
-          userId: ticket.sub,
-          deviceId: command.deviceId,
-        });
+        mockSuccessRegisteredDevice(callback);
       });
 
       AWS.mock('DynamoDB.DocumentClient', 'query', function (params, callback) {
@@ -133,10 +134,7 @@ describe('Command', function () {
 
     it('should return error information when ddb query fails with valid user', function (done) {
       AWS.mock('DynamoDB.DocumentClient', 'get', function (params, callback) {
-        callback(null, {
-          userId: ticket.sub,
-          deviceId: command.deviceId,
-        });
+        mockSuccessRegisteredDevice(callback);
       });
 
       AWS.mock('DynamoDB.DocumentClient', 'query', function (params, callback) {
@@ -251,10 +249,7 @@ describe('Command', function () {
       AWS.mock('DynamoDB.DocumentClient', 'get', function (params, callback) {
         if (_calls === 0) {
           _calls++;
-          callback(null, {
-            userId: ticket.userid,
-            deviceId: command.deviceId,
-          });
+          mockSuccessRegisteredDevice(callback);
         } else {
           callback(null, {
             Item: command,
@@ -279,10 +274,7 @@ describe('Command', function () {
       AWS.mock('DynamoDB.DocumentClient', 'get', function (params, callback) {
         if (_calls === 0) {
           _calls++;
-          callback(null, {
-            userId: ticket.userid,
-            deviceId: command.deviceId,
-          });
+          mockSuccessRegisteredDevice(callback);
         } else {
           callback(null, {});
         }
@@ -309,10 +301,7 @@ describe('Command', function () {
       AWS.mock('DynamoDB.DocumentClient', 'get', function (params, callback) {
         if (_calls === 0) {
           _calls++;
-          callback(null, {
-            userId: ticket.userid,
-            deviceId: command.deviceId,
-          });
+          mockSuccessRegisteredDevice(callback);
         } else {
           callback('error', null);
         }
@@ -416,10 +405,7 @@ describe('Command', function () {
       test(function (done) {
         let _command = new Command();
         AWS.mock('DynamoDB.DocumentClient', 'get', function (params, callback) {
-          callback(null, {
-            userId: ticket.sub,
-            deviceId: command.deviceId,
-          });
+          mockSuccessRegisteredDevice(callback);
         });
 
         AWS.mock('DynamoDB.DocumentClient', 'put', function (params, callback) {
@@ -457,10 +443,7 @@ describe('Command', function () {
       test(function (done) {
         let _command = new Command();
         AWS.mock('DynamoDB.DocumentClient', 'get', function (params, callback) {
-          callback(null, {
-            userId: ticket.sub,
-            deviceId: command.deviceId,
-          });
+          mockSuccessRegisteredDevice(callback);
         });
 
         AWS.mock('DynamoDB.DocumentClient', 'put', function (params, callback) {
@@ -495,10 +478,7 @@ describe('Command', function () {
       test(function (done) {
         let _command = new Command();
         AWS.mock('DynamoDB.DocumentClient', 'get', function (params, callback) {
-          callback(null, {
-            userId: ticket.sub,
-            deviceId: command.deviceId,
-          });
+          mockSuccessRegisteredDevice(callback);
         });
 
         AWS.mock('DynamoDB.DocumentClient', 'put', function (params, callback) {
@@ -580,6 +560,10 @@ describe('Command', function () {
     });
 
     it('should return error when commandDetails is missing', function (done) {
+      AWS.mock('DynamoDB.DocumentClient', 'get', function (params, callback) {
+        mockSuccessRegisteredDevice(callback);
+      });
+
       let invalidCommand = {
         deviceId: '42adad4d-fdd1-4db0-a501-61cffd0fa3e4',
         commandId: '82bfgd4y-uu81-io10-a602-56cnb0fhs34',
@@ -611,6 +595,11 @@ describe('Command', function () {
     });
 
     it('should return error when shadowDetails is missing', function (done) {
+      AWS.mock('DynamoDB.DocumentClient', 'get', function (params, callback) {
+        mockSuccessRegisteredDevice(callback);
+      });
+
+
       let invalidCommand = {
         deviceId: '42adad4d-fdd1-4db0-a501-61cffd0fa3e4',
         commandId: '82bfgd4y-uu81-io10-a602-56cnb0fhs34',
@@ -641,6 +630,10 @@ describe('Command', function () {
     });
 
     it('should return error when command is invalid', function (done) {
+      AWS.mock('DynamoDB.DocumentClient', 'get', function (params, callback) {
+        mockSuccessRegisteredDevice(callback);
+      });
+
       let invalidCommand = {
         deviceId: '42adad4d-fdd1-4db0-a501-61cffd0fa3e4',
         commandId: '82bfgd4y-uu81-io10-a602-56cnb0fhs34',
@@ -676,6 +669,10 @@ describe('Command', function () {
     });
 
     it('should return error when value is not number to set temperature', function (done) {
+      AWS.mock('DynamoDB.DocumentClient', 'get', function (params, callback) {
+        mockSuccessRegisteredDevice(callback);
+      });
+
       let invalidCommand = {
         deviceId: '42adad4d-fdd1-4db0-a501-61cffd0fa3e4',
         commandId: '82bfgd4y-uu81-io10-a602-56cnb0fhs34',
@@ -711,6 +708,10 @@ describe('Command', function () {
     });
 
     it('should return error when power status is not valid', function (done) {
+      AWS.mock('DynamoDB.DocumentClient', 'get', function (params, callback) {
+        mockSuccessRegisteredDevice(callback);
+      });
+
       let invalidCommand = {
         deviceId: '42adad4d-fdd1-4db0-a501-61cffd0fa3e4',
         commandId: '82bfgd4y-uu81-io10-a602-56cnb0fhs34',

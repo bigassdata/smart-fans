@@ -22,7 +22,7 @@
  */
 const Logger = require('logger');
 const Auth = require('authorizer');
-const Command = require('./command.js');
+const Command = require('./command/index.js');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -55,13 +55,13 @@ const claimTicketHandler = async (req, res, next) => {
   } catch (err) {
     return res
       .status(401)
-      .json({error: 'AccessDeniedException', message: err.message});
+      .json({ error: 'AccessDeniedException', message: err.message });
   }
 };
 
 const createCommand = async (req, res) => {
-  const {body, ticket} = req;
-  const {deviceId} = req.params;
+  const { body, ticket } = req;
+  const { deviceId } = req.params;
   let _command = new Command();
   Logger.log(
     Logger.levels.INFO,
@@ -80,8 +80,8 @@ const createCommand = async (req, res) => {
 };
 
 const getCommand = async (req, res) => {
-  const {ticket} = req;
-  const {deviceId, commandId} = req.params;
+  const { ticket } = req;
+  const { deviceId, commandId } = req.params;
   let _command = new Command();
   Logger.log(
     Logger.levels.INFO,
@@ -100,9 +100,9 @@ const getCommand = async (req, res) => {
 };
 
 const listCommands = async (req, res) => {
-  const {ticket} = req;
-  const {deviceId} = req.params;
-  const {lastevalkey, commandStatus} = req.query;
+  const { ticket } = req;
+  const { deviceId } = req.params;
+  const { lastevalkey, commandStatus } = req.query;
   let _command = new Command();
   Logger.log(
     Logger.levels.INFO,
