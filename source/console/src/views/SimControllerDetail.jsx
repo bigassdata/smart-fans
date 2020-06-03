@@ -574,8 +574,8 @@ class SimControllerDetail extends Component {
       let body = {
         deviceId: deviceId,
         commandDetails: {
-          command: this.state.setCommand,
-          value: this.state.setCommandValue,
+          command: setCommand,
+          value: setCommandValue,
         }
       }
 
@@ -716,7 +716,7 @@ class SimControllerDetail extends Component {
       deviceError, statusError, commandError, commandDetailError, eventLogsError, eventDetailError,
       title, message, isMinimized, } = this.state;
     const commandThArray = ['Command Detail', 'Command Status', 'Created At', 'Updated At'];
-    const disabledConditions = ['FAIL', 'Disconnected'];
+    // const disabledConditions = ['FAIL', 'Disconnected'];
     const eventThArray = ['Event Message', 'Event Type', 'Created At'];
 
     return (
@@ -832,9 +832,12 @@ class SimControllerDetail extends Component {
                                         </tr>
                                         {Object.keys(deviceStatus.state).length !== 0 &&
                                           Object.keys(deviceStatus.state.reported).map(key => {
+
+                                            let part = null;
+
                                             let value = deviceStatus.state.reported[key];
                                             if (typeof value !== "object") {
-                                              return (
+                                              part = (
                                                 <tr key={key}>
                                                   <td>{key}</td>
                                                   <td>{deviceStatus.state.reported[key]}</td>
@@ -843,11 +846,10 @@ class SimControllerDetail extends Component {
                                             } else {
                                               if (key === 'fan') {
                                                 //console.log(`Value is ${JSON.stringify(value)}`);
-                                                let rows = [];
-                                                Object.keys(value).map(address => {
+                                                let rows = Object.keys(value).map(address => {
                                                   //console.log(`Fan @ ${address}`);
                                                   let fanProps = value[address];
-                                                  rows.push(
+                                                  return (
                                                     <Table striped bordered>
                                                       <tbody>
                                                         <tr key={key + '-' + address}>
@@ -882,16 +884,16 @@ class SimControllerDetail extends Component {
                                                   );
                                                 })
 
-                                                return (
+                                                part = (
                                                   <tr key={key + 'data'}>
                                                     <td colSpan="2">
                                                       {rows}
                                                     </td>
                                                   </tr>
                                                 )
-
                                               }
                                             }
+                                            return part;
                                           })
                                         }
 
