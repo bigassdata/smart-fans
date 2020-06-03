@@ -1,6 +1,7 @@
 import Devices from "views/Devices.jsx";
 import DeviceRegistration from "views/DeviceRegistration.jsx";
 import DeviceDetail from "views/DeviceDetail.jsx";
+import SimControllerDetail from "views/SimControllerDetail.jsx";
 import Alerts from "views/Alerts.jsx";
 import History from "views/History.jsx";
 import UserSetting from "views/UserSetting.jsx";
@@ -23,10 +24,18 @@ const dashboardRoutes = [
     visible: false
   },
   {
-    path: "/devices/:deviceId",
+    path: "/devices/test-model/:deviceId",
     name: "Device Detail",
     icon: "pe-7s-home",
     component: DeviceDetail,
+    layout: "/admin",
+    visible: false
+  },
+  {
+    path: "/devices/sim-controller/:deviceId",
+    name: "Controller Detail",
+    icon: "pe-7s-home",
+    component: SimControllerDetail,
     layout: "/admin",
     visible: false
   },

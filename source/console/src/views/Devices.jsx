@@ -51,8 +51,8 @@ class Devices extends Component {
   }
 
   // Gets a device detail
-  handleDevice(deviceId) {
-    this.props.history.push(`/devices/${deviceId}`);
+  handleDevice(deviceId, modelNumber) {
+    this.props.history.push(`/devices/${modelNumber}/${deviceId}`);
   }
 
   // Handles to delete a device
@@ -84,7 +84,7 @@ class Devices extends Component {
           this.props.handleNotification('Device was deleted successfully', 'success', 'pe-7s-close-circle', 5);
 
           let updatedDevices = this.state.devices.filter(device => device.thingName !== deviceId);
-          this.setState({ 
+          this.setState({
             devices: updatedDevices,
             title: `My Devices (${updatedDevices.length})`
           });
@@ -142,8 +142,8 @@ class Devices extends Component {
       } else {
         // Some keyword and certain status
         if (deviceName.indexOf(keyword) > -1
-        || modelNumber.indexOf(keyword) > -1
-        || thingName.indexOf(keyword) > -1) {
+          || modelNumber.indexOf(keyword) > -1
+          || thingName.indexOf(keyword) > -1) {
           if (connectivity === connected) {
             devices[i].visible = true;
           } else {
@@ -198,7 +198,7 @@ class Devices extends Component {
 
         // Sorts initially
         devices.sort((a, b) => a.attributes.deviceName.localeCompare(b.attributes.deviceName));
-        this.setState({ 
+        this.setState({
           devices: devices,
           title: `My Devices (${devices.length})`,
         });
@@ -308,17 +308,17 @@ class Devices extends Component {
                               onClick={() => this.handleDelete(device.thingName, device.attributes.deviceName)}>Delete</Button>
                             <Button bsStyle="warning" bsSize="small"
                               className="btn-fill pull-right" active
-                              onClick={() => this.handleDevice(device.thingName)}>Detail</Button>
+                              onClick={() => this.handleDevice(device.thingName, device.attributes.modelNumber)}>Detail</Button>
                             <div className="clearfix" />
                           </div>
                         }
                       />
                     </Col>
                   )
-              })
+                })
             }
           </Row>
-          { isLoading &&
+          {isLoading &&
             <Row>
               <Col md={12}>
                 <div>
@@ -327,7 +327,7 @@ class Devices extends Component {
               </Col>
             </Row>
           }
-          { error &&
+          {error &&
             <Row>
               <Col md={12}>
                 <Alert bsStyle="danger">
@@ -346,7 +346,7 @@ class Devices extends Component {
             <Button onClick={this.handleDeleteClose}>Close</Button>
             <Button bsStyle="primary" className="btn-fill" active onClick={() => this.deleteDevice(this.state.deviceId)}>Delete</Button>
           </Modal.Footer>
-          { isDeleting &&
+          {isDeleting &&
             <div>
               <ProgressBar active now={50} />
             </div>

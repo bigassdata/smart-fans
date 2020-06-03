@@ -22,7 +22,7 @@ import {
 
 import { Card } from "components/Card/Card.jsx";
 
-class DeviceDetail extends Component {
+class SimControllerDetail extends Component {
   constructor(props) {
     super(props);
 
@@ -58,15 +58,16 @@ class DeviceDetail extends Component {
       device: false,
       deviceStatus: false,
       deviceError: false,
+
       statusError: false,
       title: '',
       isMinimized: false,
 
       // commands
       actualTemperature: '',
-      targetTemperature: '',
+      autoIdealTemperature: '',
       updatedTargetTemperature: '',
-      targetTemperatureState: null,
+      autoIdealTemperatureState: null,
       setCommand: '',
       setCommandValue: '',
       commandShow: false,
@@ -234,6 +235,9 @@ class DeviceDetail extends Component {
 
   // Handles create command
   handleCreateCommand = (mode) => {
+
+    // TODO: Implement controller command
+
     let pass = true;
     let message = '';
     let setCommand = '';
@@ -258,16 +262,16 @@ class DeviceDetail extends Component {
         setCommandValue = 'OFF';
         break;
       }
-      case 'TEMPERATURE': {
-        if (!this.targetTemperatureValidate()) {
+      case 'AUTO-IDEAL-TEMPERATURE': {
+        if (!this.autoIdealTemperatureValidate()) {
           pass = false;
-          message = 'Invalid target temperature. (50 <= temperature <= 110)';
-        } else if (this.state.targetTemperature === this.state.updatedTargetTemperature) {
+          message = 'Invalid target temperature. (10 <= temperature <= 45)';
+        } else if (this.state.autoIdealTemperature === this.state.updatedTargetTemperature) {
           pass = false;
           message = 'Target temperature has not been changed.';
         } else {
           message = `set the temperature to ${this.state.updatedTargetTemperature}`;
-          setCommand = 'set-temp';
+          setCommand = 'set-autoIdealTemperature';
           setCommandValue = this.state.updatedTargetTemperature;
         }
         break;
@@ -297,7 +301,7 @@ class DeviceDetail extends Component {
   // Handles target temperature change
   handleTargetTemperatureChange = (event) => {
     this.setState({ updatedTargetTemperature: event.target.value }, () => {
-      this.targetTemperatureValidate();
+      this.autoIdealTemperatureValidate();
     });
   }
 
@@ -420,6 +424,7 @@ class DeviceDetail extends Component {
     API.get(apiName, path, params)
       .then(response => {
         let deviceStatus = '';
+        //console.log(`Device State: ${JSON.stringify(response)}`);
         if (
           Object.keys(response.data).length === 0
           || response.data.state.reported === undefined
@@ -430,9 +435,9 @@ class DeviceDetail extends Component {
             connected: false,
           }
           this.setState({
+            instanceNumber: 'N/A',
             actualTemperature: 'N/A',
-            targetTemperature: 'N/A',
-
+            autoIdealTemperature: 'N/A'
           }, () => { });
         } else {
           deviceStatus = response.data;
@@ -440,13 +445,12 @@ class DeviceDetail extends Component {
           if (this.state.statusInitial) {
             this.setState({
               actualTemperature: reported.actualTemperature,
-              targetTemperature: reported.targetTemperature,
-              updatedTargetTemperature: reported.targetTemperature,
-              powerStatus: reported.powerStatus,
+              autoIdealTemperature: reported.autoIdealTemperature,
             });
           } else {
             this.setState({
               actualTemperature: reported.actualTemperature,
+              autoIdealTemperature: reported.autoIdealTemperature,
             });
           }
         }
@@ -465,8 +469,6 @@ class DeviceDetail extends Component {
 
         this.setState({
           actualTemperature: 'N/A',
-          targetTemperature: 'N/A',
-          powerStatus: 'FAIL',
         });
       })
       .finally(() => {
@@ -538,20 +540,20 @@ class DeviceDetail extends Component {
   };
 
   // Validates target temperature
-  targetTemperatureValidate = () => {
+  autoIdealTemperatureValidate = () => {
     let temperature = this.state.updatedTargetTemperature;
     let pass = !isNaN(temperature) && temperature !== ''
-      && temperature >= 50 && temperature <= 110;
+      && temperature >= 10 && temperature <= 45;
 
     if (!pass) {
       this.setState({
         showHelpBlock: true,
-        targetTemperatureState: 'error',
+        autoIdealTemperatureState: 'error',
       });
     } else {
       this.setState({
         showHelpBlock: false,
-        targetTemperatureState: null,
+        autoIdealTemperatureState: null,
       });
     }
 
@@ -563,14 +565,10 @@ class DeviceDetail extends Component {
     if (!this.state.creatingCommand) {
       this.setState({ creatingCommand: true });
       const { deviceId } = this.props.match.params;
-      let { targetTemperature, setCommand, setCommandValue, powerStatus } = this.state;
+      let { autoIdealTemperature, setCommand, setCommandValue } = this.state;
 
-      if (setCommand === 'set-temp') {
-        targetTemperature = this.state.updatedTargetTemperature;
-      }
-
-      if (setCommand === 'set-mode') {
-        powerStatus = setCommandValue;
+      if (setCommand === 'set-autoIdealTemperature') {
+        autoIdealTemperature = this.state.updatedTargetTemperature;
       }
 
       let body = {
@@ -578,11 +576,6 @@ class DeviceDetail extends Component {
         commandDetails: {
           command: this.state.setCommand,
           value: this.state.setCommandValue,
-        },
-        shadowDetails: {
-          powerStatus: powerStatus,
-          actualTemperature: this.state.actualTemperature,
-          targetTemperature: targetTemperature,
         }
       }
 
@@ -600,8 +593,7 @@ class DeviceDetail extends Component {
       API.post(apiName, path, params)
         .then(response => {
           this.setState({
-            powerStatus: powerStatus,
-            targetTemperature: targetTemperature,
+            autoIdealTemperature: autoIdealTemperature,
           }, () => { });
           this.props.handleNotification('Success to execute the command', 'success', 'pe-7s-check', 5);
         })
@@ -718,7 +710,7 @@ class DeviceDetail extends Component {
 
   render() {
     const { loadingDevice, loadingStatus, device, deviceStatus,
-      loadingCommand, commandDetailLoading, creatingCommand, commands, commandStatus, powerStatus, commandDetail,
+      loadingCommand, commandDetailLoading, creatingCommand, commands, commandStatus, commandDetail,
       loadingEventLogs, eventDetailLoading, events, eventType, eventDetail,
       commandHasMore, eventLogsHasMore, showCommandHelpBlock,
       deviceError, statusError, commandError, commandDetailError, eventLogsError, eventDetailError,
@@ -840,14 +832,69 @@ class DeviceDetail extends Component {
                                         </tr>
                                         {Object.keys(deviceStatus.state).length !== 0 &&
                                           Object.keys(deviceStatus.state.reported).map(key => {
-                                            return (
-                                              <tr key={key}>
-                                                <td>{key}</td>
-                                                <td>{deviceStatus.state.reported[key]}</td>
-                                              </tr>
-                                            )
+                                            let value = deviceStatus.state.reported[key];
+                                            if (typeof value !== "object") {
+                                              return (
+                                                <tr key={key}>
+                                                  <td>{key}</td>
+                                                  <td>{deviceStatus.state.reported[key]}</td>
+                                                </tr>
+                                              );
+                                            } else {
+                                              if (key === 'fan') {
+                                                //console.log(`Value is ${JSON.stringify(value)}`);
+                                                let rows = [];
+                                                Object.keys(value).map(address => {
+                                                  //console.log(`Fan @ ${address}`);
+                                                  let fanProps = value[address];
+                                                  rows.push(
+                                                    <Table striped bordered>
+                                                      <tbody>
+                                                        <tr key={key + '-' + address}>
+                                                          <td colSpan="2"><b>{fanProps.fanType} @ {address}</b></td>
+                                                        </tr>
+                                                        <tr>
+                                                          <td>Power</td>
+                                                          <td>{fanProps.power ? 'ON' : 'OFF'}</td>
+                                                        </tr>
+                                                        <tr>
+                                                          <td>Commanded Speed</td>
+                                                          <td>{fanProps.commandedSpeedPercent} %</td>
+                                                        </tr>
+                                                        <tr>
+                                                          <td>Actual Speed</td>
+                                                          <td>{fanProps.actualSpeedPercent} %</td>
+                                                        </tr>
+                                                        <tr>
+                                                          <td>Direction</td>
+                                                          <td>{fanProps.isForward ? 'Forward' : 'Reverse'}</td>
+                                                        </tr>
+                                                        <tr>
+                                                          <td>Auto</td>
+                                                          <td>{fanProps.autoEnable ? "ON" : "OFF"}</td>
+                                                        </tr>
+                                                        <tr>
+                                                          <td>Fault Code</td>
+                                                          <td>{fanProps.activeFault}</td>
+                                                        </tr>
+                                                      </tbody>
+                                                    </Table>
+                                                  );
+                                                })
+
+                                                return (
+                                                  <tr key={key + 'data'}>
+                                                    <td colSpan="2">
+                                                      {rows}
+                                                    </td>
+                                                  </tr>
+                                                )
+
+                                              }
+                                            }
                                           })
                                         }
+
                                         {Object.keys(deviceStatus.state).length === 0 &&
                                           <tr>
                                             <td>State</td>
@@ -856,6 +903,7 @@ class DeviceDetail extends Component {
                                         }
                                       </tbody>
                                     </Table>
+
                                   </div>
                                 }
                               />
@@ -864,8 +912,8 @@ class DeviceDetail extends Component {
                         </Row>
                       </Tab>
                       {/*
-  Commands Tab
-*/}
+                        Commands Tab
+                      */}
                       <Tab eventKey={"commands"} title="Commands">
                         <Row>
                           <Col md={12}>
@@ -875,33 +923,7 @@ class DeviceDetail extends Component {
                                   <p>Issue Remote Command</p>
                                   <ListGroup>
                                     <ListGroupItem>
-                                      <h3>Mode</h3>
-                                      <Col md={12}>
-                                        <FormGroup>
-                                          <ControlLabel>Current Mode</ControlLabel>
-                                          <FormControl type="text" defaultValue={this.state.powerStatus} disabled />
-                                        </FormGroup>
-                                      </Col>
-                                      <div>
-                                        <Button className="btn-fill pull-right" bsSize="small" id="OFF"
-                                          onClick={() => this.handleCreateCommand('OFF')}
-                                          disabled={powerStatus === 'OFF' || disabledConditions.indexOf(powerStatus) > -1}
-                                          active={disabledConditions.indexOf(powerStatus) < 0}>OFF</Button>
-                                        <span className="pull-right">&nbsp;</span>
-                                        <Button bsStyle="primary" bsSize="small" id="AC" className="btn-fill pull-right"
-                                          onClick={() => this.handleCreateCommand('AC')}
-                                          disabled={powerStatus === 'AC' || disabledConditions.indexOf(powerStatus) > -1}
-                                          active={disabledConditions.indexOf(powerStatus) < 0}>AC</Button>
-                                        <span className="pull-right">&nbsp;</span>
-                                        <Button bsStyle="danger" bsSize="small" id="HEAT" className="btn-fill pull-right"
-                                          onClick={() => this.handleCreateCommand('HEAT')}
-                                          disabled={powerStatus === 'HEAT' || disabledConditions.indexOf(powerStatus) > -1}
-                                          active={disabledConditions.indexOf(powerStatus) < 0}>HEAT</Button>
-                                        <div className="clearfix" />
-                                      </div>
-                                    </ListGroupItem>
-                                    <ListGroupItem>
-                                      <h3>Temperature (&#8457;)</h3>
+                                      <h3>Temperature (&#8451;)</h3>
                                       <Col md={6}>
                                         <FormGroup>
                                           <ControlLabel>Actual Temperature</ControlLabel>
@@ -909,10 +931,9 @@ class DeviceDetail extends Component {
                                         </FormGroup>
                                       </Col>
                                       <Col md={6}>
-                                        <FormGroup validationState={this.state.targetTemperatureState}>
-                                          <ControlLabel>Target Temperature</ControlLabel>
-                                          <FormControl type="number" step="0.01" defaultValue={this.state.targetTemperature}
-                                            disabled={disabledConditions.indexOf(powerStatus) > -1}
+                                        <FormGroup validationState={this.state.autoIdealTemperatureState}>
+                                          <ControlLabel>Ideal Temperature</ControlLabel>
+                                          <FormControl type="number" step="0.1" defaultValue={this.state.autoIdealTemperature}
                                             onChange={this.handleTargetTemperatureChange} />
                                           {showCommandHelpBlock &&
                                             <HelpBlock>Invalid value</HelpBlock>
@@ -920,9 +941,9 @@ class DeviceDetail extends Component {
                                         </FormGroup>
                                       </Col>
                                       <Button bsStyle="warning" bsSize="small" className="btn-fill pull-right"
-                                        onClick={() => this.handleCreateCommand('TEMPERATURE')}
-                                        disabled={disabledConditions.indexOf(powerStatus) > -1}
-                                        active={disabledConditions.indexOf(powerStatus) < 0}>Set Temperature</Button>
+                                        onClick={() => this.handleCreateCommand('AUTO-IDEAL-TEMPERATURE')}>
+                                        Set Temperature
+                                      </Button>
                                       <div className="clearfix" />
                                     </ListGroupItem>
                                   </ListGroup>
@@ -1243,7 +1264,8 @@ class DeviceDetail extends Component {
               }
             </div>
           }
-          {(loadingDevice || loadingStatus) &&
+          {
+            (loadingDevice || loadingStatus) &&
             <Row>
               <Col md={12}>
                 <div>
@@ -1252,7 +1274,8 @@ class DeviceDetail extends Component {
               </Col>
             </Row>
           }
-          {deviceError &&
+          {
+            deviceError &&
             <Row>
               <Col md={12}>
                 <Alert bsStyle="danger">
@@ -1261,7 +1284,8 @@ class DeviceDetail extends Component {
               </Col>
             </Row>
           }
-          {statusError &&
+          {
+            statusError &&
             <Row>
               <Col md={12}>
                 <Alert bsStyle="danger">
@@ -1270,11 +1294,11 @@ class DeviceDetail extends Component {
               </Col>
             </Row>
           }
-        </Grid>
+        </Grid >
         {/*
   Modal dialog
 */}
-        <Modal show={this.state.commandDetailShow} onHide={this.handleCommandDetailClose}>
+        < Modal show={this.state.commandDetailShow} onHide={this.handleCommandDetailClose} >
           <Modal.Header closeButton>
             <Modal.Title>Command Detail</Modal.Title>
           </Modal.Header>
@@ -1337,7 +1361,7 @@ class DeviceDetail extends Component {
           <Modal.Footer>
             <Button className="btn-fill" onClick={this.handleCommandDetailClose}>Close</Button>
           </Modal.Footer>
-        </Modal>
+        </Modal >
         <Modal show={this.state.commandShow} onHide={this.handleCommandClose}>
           <Modal.Header closeButton>
             <Modal.Title>Device Command</Modal.Title>
@@ -1425,16 +1449,17 @@ class DeviceDetail extends Component {
             <Button className="btn-fill" onClick={this.handleEventDetailClose}>Close</Button>
           </Modal.Footer>
         </Modal>
-        {device &&
+        {
+          device &&
           <Row>
             <Col md={12}>
               <Button className="btn-fill pull-right" bsSize="small" onClick={this.props.goTop}>Top</Button>
             </Col>
           </Row>
         }
-      </div>
+      </div >
     )
   }
 }
 
-export default DeviceDetail;
+export default SimControllerDetail;
