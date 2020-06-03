@@ -3,13 +3,14 @@ const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
 
-const TestModel = require('./thingTypes/testModel');
+const SmartProduct = require('./thingTypes/smartProduct');
+const SimController = require('./thingTypes/simController');
 
 
 let Device; // Assign the constructor to Device
 
 // TODO: Create CLI to choose device directory
-let deviceDir = '/c/projects/smart-fans/tools/devices/801fcc1a-72ce-4b71-a1ec-2aeee8adae4f';
+let deviceDir = '/c/projects/smart-fans/tools/devices/86586301-db6e-48bc-9c1d-27f0d2f8aa7e';
 
 console.log(`Getting device properties from ${deviceDir}`);
 
@@ -21,11 +22,17 @@ try {
     console.error(`Error loading device properties: ${err}`);
 }
 
-if (properties.MODEL_NUMBER == 'test-model') {
-    Device = TestModel
-} else {
-    console.warn(`Unknown MODEL NUMBER: ${properties.MODEL_NUMBER}.`);
-    process.exit(1);
+switch (properties.MODEL_NUMBER) {
+    case 'test-model':
+        Device = SmartProduct;
+        break;
+    case 'sim-controller':
+        Device = SimController;
+        break;
+    default:
+        console.warn(`Unknown MODEL NUMBER: ${properties.MODEL_NUMBER}.`);
+        process.exit(1);
+        break;
 }
 
 let device = new Device(deviceDir, properties);

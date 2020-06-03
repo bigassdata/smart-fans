@@ -41,7 +41,13 @@ class Device {
      * @param {String} path - the directory with the required device files
      */
     constructor(path, properties) {
+
         this.isInitialized = false;
+        // Used for testing
+        if (properties.offline && properties.offline == true) {
+            return;
+        }
+
         if (path == null) {
             console.error('[Device constructor] path is null');
             throw new Error('[Device constructor] path is null');

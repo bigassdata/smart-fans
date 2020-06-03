@@ -1,6 +1,7 @@
 'use strict';
 
 const HVACCommandStrategy = require('./hvacCommandStrategy');
+const SimControllerCommandStrategy = require('./simControllerCommandStrategy');
 
 /**
  *
@@ -15,8 +16,11 @@ const commandStrategyFactory = (modelNumber, command) => {
         case 'test-model':
             commandStrategy = new HVACCommandStrategy(command);
             break;
+        case 'sim-controller':
+            commandStrategy = new SimControllerCommandStrategy(command);
+            break;
         default:
-            throw new Error('Unknown model number.  No commands associated with model.');
+            throw new Error(`Unknown model number (${modelNumber}).  No commands associated with model.`);
     }
 
     return commandStrategy;
