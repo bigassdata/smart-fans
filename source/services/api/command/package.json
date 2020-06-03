@@ -30,7 +30,7 @@
     },
     "scripts": {
         "pretest": "rm -rf package-lock.json && rm -rf node_modules && npm install",
-        "test": "env AWS_REGION='test' mocha lib/**/*.spec.js",
+        "test": "env AWS_REGION='test' mocha --recursive lib/command/**/*.spec.js",
         "prestart": "rm -rf package-lock.json && npm install",
         "start": "node index.js",
         "build:init": "rm -rf package-lock.json && rm -rf dist && rm -rf node_modules",
