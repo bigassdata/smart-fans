@@ -1,8 +1,7 @@
 'use strict';
 
 const commandValidator = require('./commandValidator');
-const commandToShadowTransform = require('./commandToShadowTransform');
-
+const Logger = require('logger');
 
 class SimControllerCommandStrategy {
 
@@ -14,6 +13,10 @@ class SimControllerCommandStrategy {
         let isCommandValid = true;
         if (this.command === undefined
             || !commandValidator.isValid(this.command)) {
+            Logger.log(
+                Logger.levels.INFO,
+                'Command is Invalid', JSON.stringify(this.command)
+            );
             isCommandValid = false
         }
         return isCommandValid;
