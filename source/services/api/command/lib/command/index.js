@@ -257,7 +257,7 @@ class Command {
           return Promise.reject({
             code: 400,
             error: 'InvalidParameter',
-            message: `Body parameters are invalid. Please check the API specification. Body is ${JSON.stringify(command)}`
+            message: `Body parameters are invalid. Please check the API specification.`
           });
         }
 

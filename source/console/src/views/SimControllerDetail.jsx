@@ -572,8 +572,10 @@ class SimControllerDetail extends Component {
       }
 
       let body = {
-        command: setCommand,
-        value: setCommandValue,
+        commandDetails: {
+          command: setCommand,
+          value: setCommandValue,
+        }
       }
 
       let token = await this.props.getToken();

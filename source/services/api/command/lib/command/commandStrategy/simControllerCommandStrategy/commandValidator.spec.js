@@ -18,6 +18,14 @@ describe('Simulated Controller CommandValidator', function () {
         expect(isValid(validCommand)).to.be.true;
     });
 
+    it('Validates a set-autoIdealTemperature command with a string-based value', function () {
+        let validCommand = {
+            command: 'set-autoIdealTemperature',
+            value: '23.2'
+        }
+        expect(isValid(validCommand)).to.be.true;
+    });
+
     it('Fails for an empty command', () => {
         let invalidCommand = {
             command: '',

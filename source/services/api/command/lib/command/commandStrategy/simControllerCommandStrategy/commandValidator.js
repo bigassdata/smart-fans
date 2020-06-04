@@ -3,6 +3,9 @@
 const _ = require('lodash');
 const fs = require('fs');
 
+const isANumber = x => _.isNumber(x) || _.isString(x) && _.isNumber(+x);
+
+
 /**
  * A type validator for simulated fan controllers.
  *
@@ -16,7 +19,7 @@ const fs = require('fs');
  */
 const typeValidator = {
     "string": _.isString,
-    "number": _.isNumber,
+    "number": isANumber,
     "boolean": _.isBoolean,
     "modbusAddress": (value) => _.isInteger(value) && value >= 1 && value <= 247
 }

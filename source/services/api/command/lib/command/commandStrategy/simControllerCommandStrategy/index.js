@@ -12,7 +12,8 @@ class SimControllerCommandStrategy {
     validate() {
         let isCommandValid = true;
         if (this.command === undefined
-            || !commandValidator.isValid(this.command)) {
+            || this.command.commandDetails === undefined
+            || !commandValidator.isValid(this.command.commandDetails)) {
             Logger.log(
                 Logger.levels.INFO,
                 'Command is Invalid', JSON.stringify(this.command)
