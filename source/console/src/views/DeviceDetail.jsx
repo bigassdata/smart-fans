@@ -69,6 +69,7 @@ class DeviceDetail extends Component {
       targetTemperatureState: null,
       setCommand: '',
       setCommandValue: '',
+      powerStatus: '',
       commandShow: false,
       commandMessage: '',
       showCommandHelpBlock: false,
@@ -432,6 +433,7 @@ class DeviceDetail extends Component {
           this.setState({
             actualTemperature: 'N/A',
             targetTemperature: 'N/A',
+            powerStatus: 'Disconnected',
 
           }, () => { });
         } else {
