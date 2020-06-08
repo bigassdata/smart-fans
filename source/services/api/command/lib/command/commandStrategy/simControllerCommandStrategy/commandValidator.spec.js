@@ -11,11 +11,8 @@ let { isValid } = require('./commandValidator.js');
 describe('Simulated Controller CommandValidator', function () {
 
     it('Validates a set-autoIdealTemperature command', function () {
-        let validCommand = {
-            command: 'set-autoIdealTemperature',
-            value: 23.2
-        }
-        expect(isValid(validCommand)).to.be.true;
+        let validCommand = { "commandDetails": { "command": "set-autoIdealTemperature", "value": "24" } }
+        expect(isValid(validCommand.commandDetails)).to.be.true;
     });
 
     it('Validates a set-autoIdealTemperature command with a string-based value', function () {

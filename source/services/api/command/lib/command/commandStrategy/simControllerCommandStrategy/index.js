@@ -1,12 +1,17 @@
 'use strict';
 
 const commandValidator = require('./commandValidator');
+const { transform } = require('./commandToShadowTransform');
 const Logger = require('logger');
 
 class SimControllerCommandStrategy {
 
     constructor(command) {
-        this.command = command;
+        if (typeof command === 'string') {
+            this.command = JSON.parse(command);
+        } else {
+            this.command = command;
+        }
     }
 
     validate() {
@@ -21,6 +26,14 @@ class SimControllerCommandStrategy {
             isCommandValid = false
         }
         return isCommandValid;
+    }
+
+    getDetails() {
+        return this.command.commandDetails;
+    }
+
+    getShadowDetails() {
+        return transform( this.command.commandDetails );
     }
 
 

@@ -568,13 +568,13 @@ class SimControllerDetail extends Component {
       let { autoIdealTemperature, setCommand, setCommandValue } = this.state;
 
       if (setCommand === 'set-autoIdealTemperature') {
-        autoIdealTemperature = this.state.updatedTargetTemperature;
+        autoIdealTemperature = +this.state.updatedTargetTemperature;
       }
 
       let body = {
         commandDetails: {
           command: setCommand,
-          value: setCommandValue,
+          value: +setCommandValue,
         }
       }
 
