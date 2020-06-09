@@ -71,6 +71,7 @@ class SimControllerDetail extends Component {
       autoIdealTemperatureState: null,
       setCommand: '',
       setCommandValue: '',
+      setCommandIndex: null,
       commandShow: false,
       commandMessage: '',
       showCommandHelpBlock: false,
@@ -111,7 +112,7 @@ class SimControllerDetail extends Component {
 
     this.timer = setInterval(async () => {
       await this.getDeviceStatus();
-    }, 60000); // Gets status every 1 minute
+    }, 10000); // Gets status every 10 seconds
 
     window.addEventListener('scroll', this.handleScroll);
     window.addEventListener('resize', this.handleResize);
@@ -177,6 +178,7 @@ class SimControllerDetail extends Component {
 
   // Handles command status change
   handleCommandStatusChange = (event) => {
+    console.log(`handleCommandStatusChange(${event.target.value})`);
     this.setState({ updatedCommandStatus: event.target.value });
   }
 
@@ -231,8 +233,51 @@ class SimControllerDetail extends Component {
 
   // Handles command detail close
   handleCommandDetailClose = () => {
-    this.setState({ commandDetailShow: false });
+    this.setState({ commandDetailShow: false }, () => { this.getDeviceStatus(); });
+
   }
+
+  onFanUpdate = ({ property, index, value }) => {
+    console.log(`Entering onFanUpdate({ property:${property}, index:${index}, value:${value}})`);
+    let setCommand = '';
+    let setCommandValue = '';
+    let setCommandIndex = +index;
+    let message = '';
+
+    switch (property) {
+      case 'power':
+        setCommand = 'set-fan-power';
+        setCommandValue = !!value;
+        message = !!value ? 'Turn on the fan' : 'Turn off the fan';
+        break;
+      case 'autoEnable':
+        setCommand = 'set-fan-autoEnable';
+        setCommandValue = !!value;
+        message = !!value ? 'Enable auto mode' : 'Disable auto mode';
+        break;
+      case 'isForward':
+        setCommand = 'set-fan-isForward';
+        setCommandValue = !!value;
+        message = !!value ? 'Set direction to forward' : 'Set direction to reverse';
+        break;
+      default:
+        break;
+    }
+
+    if (setCommand !== '') {
+      console.log('Setting state')
+      this.setState({
+        setCommand: setCommand,
+        setCommandValue: setCommandValue,
+        setCommandIndex: setCommandIndex,
+        commandShow: true,
+        message: message,
+      }, () => { });
+    }
+
+
+  }
+
 
   // Handles create command
   handleCreateCommand = (mode) => {
@@ -566,7 +611,7 @@ class SimControllerDetail extends Component {
     if (!this.state.creatingCommand) {
       this.setState({ creatingCommand: true });
       const { deviceId } = this.props.match.params;
-      let { autoIdealTemperature, setCommand, setCommandValue } = this.state;
+      let { autoIdealTemperature, setCommand, setCommandValue, setCommandIndex } = this.state;
 
       if (setCommand === 'set-autoIdealTemperature') {
         autoIdealTemperature = +this.state.updatedTargetTemperature;
@@ -575,8 +620,12 @@ class SimControllerDetail extends Component {
       let body = {
         commandDetails: {
           command: setCommand,
-          value: +setCommandValue,
+          value: setCommandValue,
         }
+      }
+
+      if (setCommand.startsWith('set-fan')) {
+        body.commandDetails['address'] = +setCommandIndex;
       }
 
       let token = await this.props.getToken();
@@ -948,14 +997,6 @@ class SimControllerDetail extends Component {
                                       </Button>
                                       <div className="clearfix" />
                                     </ListGroupItem>
-                                    {device && deviceStatus && deviceStatus.state && deviceStatus.state.reported && deviceStatus.state.reported.fan &&
-                                      <ListGroupItem>
-                                        <h3>Fan Commands</h3>
-                                        <Col md={6}>
-                                          <FanControl fans={deviceStatus.state.reported.fan} />
-                                        </Col>
-                                      </ListGroupItem>
-                                    }
                                   </ListGroup>
                                 </div>
                               }
@@ -966,9 +1007,10 @@ class SimControllerDetail extends Component {
                           <Col md={12}>
                             <Card
                               content={
-                                <div>
-                                </div>
-                              }>
+                                device && deviceStatus && deviceStatus.state && deviceStatus.state.reported && deviceStatus.state.reported.fan &&
+                                <FanControl fans={deviceStatus.state.reported.fan} onUpdate={this.onFanUpdate} />
+                              }
+                            >
                             </Card>
                           </Col>
                         </Row>

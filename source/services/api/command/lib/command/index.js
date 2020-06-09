@@ -375,7 +375,7 @@ class Command {
         .promise();
       Logger.log(
         Logger.levels.ROBUST,
-        JSON.stringify(`shadow update response: ${result}`)
+        JSON.stringify(`shadow update response: ${JSON.stringify(result)}`)
       );
 
       return Promise.resolve(result);
@@ -427,7 +427,7 @@ class Command {
         .promise();
       Logger.log(
         Logger.levels.ROBUST,
-        JSON.stringify(`command publish response: ${_result}`)
+        JSON.stringify(`command publish response: ${JSON.stringify(_result)}`)
       );
 
       return Promise.resolve(_result);

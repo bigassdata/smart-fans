@@ -110,9 +110,15 @@ class Controller extends Device {
         this.changedPaths = getPaths(stateDelta);
         hasChanged = (this.changedPaths.length > 0);
         if (hasChanged) {
-            // console.log(`Applying changes to: ${this.changedPaths}`);
-            let newState = _.assign(controllerState, stateDelta);
-            // console.log(`New state is ${JSON.stringify(controllerState)}`);
+            console.log(`Applying changes to: ${this.changedPaths}`);
+            let newState = controllerState;
+            // for each path in changedPaths
+            this.changedPaths.forEach((path) => {
+                let stringPath = path.join('.');
+                let newValue = _.at(stateDelta, stringPath)[0];
+                newState = _.set(newState, path, newValue);
+            })
+            console.log(`New state is ${JSON.stringify(controllerState)}`);
             controllerState = newState;
         }
         return hasChanged;
