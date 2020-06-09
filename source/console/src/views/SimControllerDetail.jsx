@@ -21,6 +21,7 @@ import {
 } from 'react-bootstrap';
 
 import { Card } from "components/Card/Card.jsx";
+import { FanControl } from "components/FanControl/FanControl.jsx";
 
 class SimControllerDetail extends Component {
   constructor(props) {
@@ -947,10 +948,28 @@ class SimControllerDetail extends Component {
                                       </Button>
                                       <div className="clearfix" />
                                     </ListGroupItem>
+                                    {device && deviceStatus && deviceStatus.state && deviceStatus.state.reported && deviceStatus.state.reported.fan &&
+                                      <ListGroupItem>
+                                        <h3>Fan Commands</h3>
+                                        <Col md={6}>
+                                          <FanControl fans={deviceStatus.state.reported.fan} />
+                                        </Col>
+                                      </ListGroupItem>
+                                    }
                                   </ListGroup>
                                 </div>
                               }
                             />
+                          </Col>
+                        </Row>
+                        <Row>
+                          <Col md={12}>
+                            <Card
+                              content={
+                                <div>
+                                </div>
+                              }>
+                            </Card>
                           </Col>
                         </Row>
                         <Row>
