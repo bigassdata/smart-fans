@@ -5,10 +5,14 @@ import {
     FormControl,
     ControlLabel,
     ListGroup,
-    ListGroupItem
+    ListGroupItem,
+    Grid,
+    Row,
+    Col,
+    Button
 } from "react-bootstrap";
 
-import Toggle from 'react-bootstrap-toggle';
+import Switch from 'react-switch';
 
 /**
  * Component to Select a Fan
@@ -40,20 +44,64 @@ function Select(props) {
  */
 function OnOffToggle(props) {
     return (
-        <FormGroup>
-            <ControlLabel>{props.label}</ControlLabel>
-            <Toggle
-                name={props.name}
-                onClick={(state, node, evt) => props.onChange(evt.target.value)}
-                on={<p>ON</p>}
-                off={<p>OFF</p>}
-                size="xs"
-                offStyle="danger"
-                active={props.value}
-            />
-
+        <FormGroup controlId={props.name}>
+            <ControlLabel style={{ textAlign: 'center' }}>{props.label}&nbsp;&nbsp;</ControlLabel>
+            <Switch checked={props.value} onChange={props.onChange} />
         </FormGroup>
     );
+}
+
+/**
+ *
+ * @param {object} props
+ * @param {object} props.fan - A fan object
+ * @param {function} props.onChange - Function to handle number formcontrol's onChange event
+ * @param {function} props.onClick - Function to handle submission of new speed.
+ */
+function SpeedControl(props) {
+    return (
+        <React.Fragment>
+            <Col md={6}>
+                <FormGroup>
+                    <ControlLabel>Actual Speed (%)</ControlLabel>
+                    <FormControl type="number" value={props.fan.actualSpeedPercent} disabled />
+                </FormGroup>
+            </Col>
+            <Col md={6}>
+                <FormGroup>
+                    <ControlLabel>Commanded Speed (%)</ControlLabel>
+                    <FormControl type="number" step="0.1" value={props.fan.commandedSpeedPercent}
+                        onChange={props.onChange} disabled={!props.fan.power} />
+                </FormGroup>
+            </Col>
+            <Button bsStyle="warning" bsSize="small" className="btn-fill pull-right" disabled={!props.fan.power}
+                onClick={props.onClick}>
+                Set Speed
+        </Button>
+            <div className="clearfix" />
+        </React.Fragment>
+    );
+}
+
+/**
+ *
+ * @param {object} props
+ * @param {object} props.fan - fan object
+ * @param {function} props.onClick - function to trigger clearing faults
+ */
+function FaultControl(props) {
+    return (
+        <React.Fragment>
+            <Col>
+                <FormGroup>
+                    <ControlLabel>Current Fault Status</ControlLabel>
+                    <FormControl type="text" value={props.fan.activeFault} disabled />
+                    <Button bsStyle="warning" bsSize="small" className="btn-fill pull-right" onClick={props.onClick}>Clear Faults</Button>
+                </FormGroup>
+            </Col>
+            <div className="clearfix" />
+        </React.Fragment>
+    )
 }
 
 /**
@@ -99,7 +147,7 @@ export class FanControl extends React.Component {
         console.log(`Selected fan index is ${event.target.value}`);
         const selectedFan = this.props.fans[event.target.value];
         console.log(`Selected Fan is ${JSON.stringify(selectedFan)}`);
-        this.setState({ selectedId: event.target.value, selectedFan: selectedFan });
+        this.setState({ selectedId: event.target.value, selectedFan: selectedFan }, () => this.forceUpdate());
     }
 
     // Toggle function - invert the current value and set it. We optimistically set the currentFan
@@ -138,6 +186,30 @@ export class FanControl extends React.Component {
         )
     }
 
+    onCommandedSpeed = (val) => {
+        let fan = this.state.selectedFan;
+        fan.commandedSpeedPercent = +val;
+        this.setState(
+            { selectedFan: fan }
+        )
+    }
+
+    handleSpeedCommand = () => {
+        let fan = this.state.selectedFan;
+        this.onUpdate({ index: this.state.selectedId, property: 'commandedSpeedPercent', value: fan.commandedSpeedPercent });
+    }
+
+    handleResetFaults = () => {
+        let fan = this.state.selectedFan;
+        fan.activeFault = '';
+        this.setState(
+            { selectedFan: fan },
+            () => {
+                this.onUpdate({ index: this.state.selectedId, property: 'resetFaults', value: true });
+            }
+        )
+    }
+
     render() {
         const { fans } = this.props;
         if (!this.state.selectedFan) {
@@ -155,19 +227,28 @@ export class FanControl extends React.Component {
                         <Select fans={fans} onSelect={this.onSelect} selectedId={this.state.selectedId} />
                     </ListGroupItem>
                     <ListGroupItem>
-                        <OnOffToggle label="Fan Power" name="powerOptions" value={this.state.selectedFan.power} onChange={this.onPower} />
+                        <Grid>
+                            <Row>
+                                <Col md={4}>
+                                    <OnOffToggle label="Power" name="powerOptions" value={this.state.selectedFan.power} onChange={this.onPower} />
+                                </Col>
+                                <Col md={4}>
+                                    <OnOffToggle label="Auto Enable" name="autoEnableOptions" value={this.state.selectedFan.autoEnable} onChange={this.onAutoEnable} />
+                                </Col>
+                                <Col md={4}>
+                                    <OnOffToggle label="Forward" name="forwardOptions" value={this.state.selectedFan.isForward} onChange={this.onIsForward} />
+                                </Col>
+                            </Row>
+                        </Grid>
                     </ListGroupItem>
                     <ListGroupItem>
-                        <OnOffToggle label="Auto Enable" name="autoEnableOptions" value={this.state.selectedFan.autoEnable} onChange={this.onAutoEnable} />
+                        <SpeedControl fan={this.state.selectedFan} onChange={(event) => { this.onCommandedSpeed(event.target.value) }} onClick={this.handleSpeedCommand} />
                     </ListGroupItem>
                     <ListGroupItem>
-                        <OnOffToggle label="Forward" name="forwardOptions" value={this.state.selectedFan.isForward} onChange={this.onIsForward} />
+                        <FaultControl fan={this.state.selectedFan} onClick={() => { this.handleResetFaults() }} />
                     </ListGroupItem>
                 </ListGroup>
             </div>
         )
     }
 }
-
-
-

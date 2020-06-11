@@ -260,6 +260,17 @@ class SimControllerDetail extends Component {
         setCommandValue = !!value;
         message = !!value ? 'Set direction to forward' : 'Set direction to reverse';
         break;
+      case 'commandedSpeedPercent':
+        setCommand = 'set-fan-commandedSpeedPercent';
+        setCommandValue = +value;
+        message = `Set fan ${index} speed to ${value}%`;
+        break;
+      case 'resetFaults':
+        setCommand = 'set-fan-resetFaults';
+        setCommandValue = true;
+        message = `Reset faults on fan ${index}`;
+        break;
+
       default:
         break;
     }

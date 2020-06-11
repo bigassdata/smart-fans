@@ -106,6 +106,9 @@ class Device {
             host: this.iotEndpoint
         });
 
+        this.statusInterval = statusInterval;
+        this.publishInterval = publishInterval;
+
         console.log('Connecting to AWS IoT...'.blue);
 
         this.device.on('error', err => this.onError(err));
@@ -256,8 +259,12 @@ class Device {
         let isDirty = false;
         try {
             isDirty = this.onChange(stateObject.state);
-            // Set the device flag to publish command success
-            if (isDirty) this.hasChanged = true;
+
+            if (isDirty) {
+                // Set the device flag to publish command success
+                this.hasChanged = true;
+                this.reportState();
+            }
         } catch (err) {
             this.publishEvent('diagnostic', `An error occurred ${JSON.stringify(err)}`);
             console.log('ERROR to set shadow.'.red);
@@ -294,12 +301,28 @@ class Device {
     }
 
     /**
-     * Override to publish the device state.
+     * A hook to apply changes to state before reporting.
+     */
+    beforeReportState() {
+
+    }
+
+
+    /**
+     * Publish the device state.  Override `getCurrentState` to customize
+     * how device state is published.
+     *
+     * Occurs every `statusInterval` and in response to changes.
+     *
+     * Use `beforeReportState` to make time-based changes before publishing.
      *
      * @example
      * clientToken = this.device.update(this.serialNumber, stateObject);
      */
     reportState() {
+        // Trigger the hook
+        this.beforeReportState();
+
         let clientToken;
         try {
             let stateObject = this.getCurrentState();

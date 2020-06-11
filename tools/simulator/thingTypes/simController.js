@@ -3,6 +3,27 @@
 const _ = require('lodash');
 const Device = require('./device');
 const getPaths = require('./../util/getPaths');
+const moment = require('moment');
+
+// Percentage chance for a fault on fan in simulation
+const FAULT_CHANCE = 30;
+
+let faultList = [
+    "No Fault",
+    "External Fault",
+    "Over Voltage",
+    "Overload",
+    "Ground Fault",
+    "Low Voltage",
+    "Internal Fault",
+    "AC Input Phase Loss",
+    "Rotor Control",
+    "Over Temperature",
+    "Current Mismatch",
+    "Impact Detected"
+];
+
+let fanAcceleration = 1 / 1000; // 1% per second
 
 let controllerState = {
     instanceNumber: "3FFFFF",
@@ -98,6 +119,11 @@ class Controller extends Device {
     constructor(path, properties) {
         super(path, properties);
         this.changedPaths = [];
+
+        // Used to track time since last report for speed changes
+        // Track one for each fan address
+        this.lastSpeedReport = {};
+
     }
 
     /**
@@ -157,8 +183,81 @@ class Controller extends Device {
 
             return accumulator;
         }
-        desired = this.changedPaths.reduce(reducer, {});
+        //desired = this.changedPaths.reduce(reducer, {});
+        desired = null;
         return desired;
+    }
+
+    beforeReportState() {
+        // If there is a difference between commandedAndActual Speed?
+        this.handleSpeedDelta();
+        // Simulate faults on the fan
+        this.handleFaultSimulation();
+    }
+
+    handleSpeedDelta() {
+        let fanAddresses = Object.keys(controllerState.fan);
+
+        fanAddresses.forEach(address => {
+            let fan = controllerState.fan[address];
+            if (!fan || !fan.commandedSpeedPercent || !fan.actualSpeedPercent) {
+                console.log(`Error handling speed delta ${JSON.stringify(fan)}`);
+                return;
+            }
+
+            let diff = fan.commandedSpeedPercent - fan.actualSpeedPercent;
+
+            if (diff !== 0) { // We need to adjust actual speed
+
+                let timeDelta = 0;
+                if (!_.isUndefined(this.lastSpeedReport[address])) {
+                    timeDelta = moment.now() - this.lastSpeedReport[address];
+                    this.lastSpeedReport[address] = moment.now();
+                } else {
+                    // This just changed, record start time and exit
+                    this.lastSpeedReport[address] = moment.now();
+                    return;
+                }
+
+                let direction = (diff > 0) ? 1 : -1;
+
+                let deltaSpeed = direction * fanAcceleration * timeDelta; // 1% / sec * 30 sec
+
+                if (Math.abs(fan.actualSpeedPercent + deltaSpeed) >= fan.commandedSpeedPercent) {
+                    console.log(`Fan @ ${address} reached commanded speed`);
+                    fan.actualSpeedPercent = fan.commandedSpeedPercent;
+                    delete this.lastSpeedReport[address]
+                } else {
+                    console.log(`Fan @ ${address} is still ${(direction == 1) ? 'Speeding Up' : 'Slowing Down'}`);
+                    // Add it up and round it off
+                    fan.actualSpeedPercent = Math.round(100 * (fan.actualSpeedPercent + deltaSpeed)) / 100;
+                }
+            }
+        });
+    }
+
+    handleFaultSimulation() {
+        let fanAddresses = Object.keys(controllerState.fan);
+
+        fanAddresses.forEach(address => {
+            let fan = controllerState.fan[address];
+
+            if (fan.resetFaults === true) {
+                console.log(`Resetting faults for Fan ${address}`);
+                fan.resetFaults = false;
+                fan.activeFault = faultList[0];
+                return; // If we reset a fault, don't do anything else
+            }
+
+            // No current fault, % chance to simulate one.
+            if (fan.activeFault === faultList[0] &&
+                _.random(1, 100) <= FAULT_CHANCE) {
+                let fault = faultList[_.random(1, 11)];
+                console.log(`Fan @ ${address} has a fault: ${fault}`);
+                fan.activeFault = fault;
+            }
+
+        });
     }
 
 
