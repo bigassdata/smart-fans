@@ -6,7 +6,7 @@ const getPaths = require('./../util/getPaths');
 const moment = require('moment');
 
 // Percentage chance for a fault on fan in simulation
-const FAULT_CHANCE = 30;
+const FAULT_CHANCE = 10;
 
 let faultList = [
     "No Fault",

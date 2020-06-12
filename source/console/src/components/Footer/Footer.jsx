@@ -10,8 +10,8 @@ class Footer extends Component {
           </nav>
           <p className="copyright pull-right">
             &copy; {new Date().getFullYear()}{" "}
-            <a href="https://aws.amazon.com/solutions" target="_blank" rel="noopener noreferrer">
-              AWS Solutions
+            <a href="https://bigassfans.com" target="_blank" rel="noopener noreferrer">
+              Big Ass Fans
             </a>
           </p>
         </Grid>
