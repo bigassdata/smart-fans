@@ -57,7 +57,17 @@ class HVAC extends Device {
                     break;
             }
             hasChanged = true;
-            this.publishEvent('info', 'Power status is changed by user', this.powerStatus);
+            let currentTime = moment();
+            this.publishEvent(
+                'info',
+                'Power status is changed by user',
+                {
+                    eventId: `event_${currentTime.valueOf()}`,
+                    sensorId: 'sensor-id',
+                    sensor: 'nice sensor',
+                    value: this.powerStatus,
+                }
+            );
         }
 
         if (desiredState.targetTemperature !== undefined) {
@@ -66,10 +76,16 @@ class HVAC extends Device {
             if (targetTemperature !== this.targetTemperature) {
                 this.targetTemperature = targetTemperature;
                 hasChanged = true;
+                let currentTime = moment();
                 this.publishEvent(
                     'info',
                     'Target temperature is changed by user',
-                    this.targetTemperature
+                    {
+                        eventId: `event_${currentTime.valueOf()}`,
+                        sensorId: 'sensor-id',
+                        sensor: 'nice sensor',
+                        value: this.targetTemperature,
+                    }
                 );
             }
         }
@@ -119,21 +135,58 @@ class HVAC extends Device {
 
     // Get colored text
     getColoredText(temperature, data) {
+        let currentTime = moment();
         // targetTemperature - 10 > temperature: error
         // targetTemperature - 10 <= temperature < targetTemperature - 5: warning
         // targetTemperature + 5 < temperature <= targetTemperature + 10: warning
         // targetTemperature + 10 < temperature: error
         if (temperature > this.targetTemperature + 10) {
-            this.publishEvent('error', 'Temperature is exceeding upper threshold', temperature);
+            this.publishEvent(
+                'error',
+                'Temperature is exceeding upper threshold',
+                {
+                    eventId: `event_${currentTime.valueOf()}`,
+                    sensorId: 'sensor-id',
+                    sensor: 'nice sensor',
+                    value: temperature,
+                }
+            );
             return data.red + ' (Danger: HOT)'.gray;
         } else if (temperature <= this.targetTemperature + 10 && temperature > this.targetTemperature + 5) {
-            this.publishEvent('warning', 'Temperature is slightly exceeding upper threshold', temperature);
+            this.publishEvent(
+                'warning',
+                'Temperature is slightly exceeding upper threshold',
+                {
+                    eventId: `event_${currentTime.valueOf()}`,
+                    sensorId: 'sensor-id',
+                    sensor: 'nice sensor',
+                    value: temperature,
+                }
+            );
             return data.yellow + ' (Warning: WARM)'.gray;
         } else if (temperature >= this.targetTemperature - 10 && temperature < this.targetTemperature - 5) {
-            this.publishEvent('warning', 'Temperature is slightly dropping under the threshold', temperature);
+            this.publishEvent(
+                'warning',
+                'Temperature is slightly dropping under the threshold',
+                {
+                    eventId: `event_${currentTime.valueOf()}`,
+                    sensorId: 'sensor-id',
+                    sensor: 'nice sensor',
+                    value: temperature,
+                }
+            );
             return data.yellow + ' (Warning: CHILLY)'.gray;
         } else if (temperature < this.targetTemperature - 10) {
-            this.publishEvent('error', 'Temperature is dropping under the threshold', temperature);
+            this.publishEvent(
+                'error',
+                'Temperature is dropping under the threshold',
+                {
+                    eventId: `event_${currentTime.valueOf()}`,
+                    sensorId: 'sensor-id',
+                    sensor: 'nice sensor',
+                    value: temperature,
+                }
+            );
             return data.blue + ' (Danger: COLD)'.gray;
         } else {
             return data.cyan + ' (NICE)'.gray;

@@ -135,24 +135,21 @@ class Device {
         this.device.subscribe(this.commandTopic);
     }
 
+    // TODO: Refactor to pass details to publish Event.
+
     /**
      * Publish an event to the Event MQTT topic.
-     * @param {*} type
-     * @param {*} message
-     * @param {*} value
+     * @param {string} type
+     * @param {string} message
+     * @param {object} A JSON object
      */
-    publishEvent(type, message, value) {
+    publishEvent(type, message, eventDetails) {
         let currentTime = moment();
         let event = {
             deviceId: this.serialNumber,
             messageId: uuid.v4(),
             message: message,
-            details: {
-                eventId: `event_${currentTime.valueOf()}`,
-                sensorId: 'sensor-id',
-                sensor: 'nice sensor',
-                value: value,
-            },
+            details: eventDetails,
             timestamp: currentTime.valueOf(),
             type: type,
             sentAt: currentTime.format(),

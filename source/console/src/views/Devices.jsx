@@ -236,7 +236,7 @@ class Devices extends Component {
           <Row>
             <Col md={12}>
               <Card
-                title={"Super cool " + title}
+                title={title}
                 content={
                   <div>
                     <Col md={4}>

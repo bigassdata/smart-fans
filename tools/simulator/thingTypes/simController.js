@@ -244,6 +244,15 @@ class Controller extends Device {
 
             if (fan.resetFaults === true) {
                 console.log(`Resetting faults for Fan ${address}`);
+                this.publishEvent(
+                    'info',
+                    `Fault was reset for fan @ ${address}`,
+                    {
+                        fanAddress: address,
+                        fanType: fan.fanType,
+                        faultCleared: fan.activeFault
+                    }
+                );
                 fan.resetFaults = false;
                 fan.activeFault = faultList[0];
                 return; // If we reset a fault, don't do anything else
@@ -254,6 +263,15 @@ class Controller extends Device {
                 _.random(1, 100) <= FAULT_CHANCE) {
                 let fault = faultList[_.random(1, 11)];
                 console.log(`Fan @ ${address} has a fault: ${fault}`);
+                this.publishEvent(
+                    'error',
+                    `Fault occurred: ${fault} @ fan ${address}`,
+                    {
+                        fanAddress: address,
+                        fanType: fan.fanType,
+                        fault: fault
+                    }
+                );
                 fan.activeFault = fault;
             }
 
