@@ -7,13 +7,14 @@ let lookup =
 }
 
 function getThingType(modelNumber) {
-    let thingTypeName = lookup[modelNumber];
+    // let thingTypeName = lookup[modelNumber];
 
-    if (!thingTypeName) {
-        throw new Error(`Unknown model number ${modelNumber}.  Associate with a thingType in ${__filename}`);
-    }
+    // if (!thingTypeName) {
+    //     throw new Error(`Unknown model number ${modelNumber}.  Associate with a thingType in ${__filename}`);
+    // }
 
-    return thingTypeName;
+    // return thingTypeName;
+    return 'SmartProduct';
 }
 
 module.exports = getThingType;
