@@ -63,6 +63,10 @@ const commandSchema = {
             "value": "number"
         },
         "fan": {
+            "fanTypeId": {
+                "value": "number",
+                "address": "modbusAddress"
+            },
             "fanType": {
                 "value": "string",
                 "address": "modbusAddress"
@@ -84,6 +88,14 @@ const commandSchema = {
             },
             "autoEnable": {
                 "value": "boolean",
+                "address": "modbusAddress"
+            },
+            "activeFaultId": {
+                "value": "number",
+                "address": "modbusAddress"
+            },
+            "activeFault": {
+                "value": "string",
                 "address": "modbusAddress"
             }
         }

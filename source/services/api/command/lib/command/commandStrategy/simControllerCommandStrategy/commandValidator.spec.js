@@ -133,8 +133,14 @@ describe('Simulated Controller CommandValidator', function () {
                 value: true,
                 address: 247
             })).to.be.true;
+        });
 
-
+        it('Validates set-fan-fanTypeId', () => {
+            expect(isValid({
+                command: 'set-fan-fanTypeId',
+                value: 2,
+                address: 2
+            })).to.be.true;
         });
 
         it('Validates set-fan-fanType', () => {
@@ -181,6 +187,22 @@ describe('Simulated Controller CommandValidator', function () {
                 command: 'set-fan-autoEnable',
                 value: true,
                 address: 2
+            })).to.be.true;
+        });
+
+        it('Validates set-fan-activeFaultId', () => {
+            expect(isValid({
+                command: 'set-fan-activeFaultId',
+                value: 1,
+                address: 2
+            }))
+        });
+
+        it('Validates set-fan-activeFault', () => {
+            expect(isValid({
+                command: 'set-fan-activeFault',
+                value: 'No Fault',
+                address:2
             })).to.be.true;
         });
 
