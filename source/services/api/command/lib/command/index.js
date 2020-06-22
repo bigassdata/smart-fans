@@ -445,18 +445,23 @@ class Command {
     }
   }
 
-
   /**
-     * Retrieves device registration information for the user.
-     * @param {string} deviceId - id of device to retrieve
-     * @param {string} userId - id of the user to retrieve
-     */
+   * Validates device is registered to user.
+   * @param {string} deviceId - id of device to retrieve
+   * @param {string} userId - id of the user to retrieve
+   */
   async _validateUserDeviceRegistration(deviceId, userId) {
-    let data = null;
-    try {
-      data = await
-        this._getUserDeviceRegistration(deviceId, userId);
+    let params = {
+      TableName: process.env.REGISTRATION_TBL,
+      Key: {
+        userId: userId,
+        deviceId: deviceId,
+      },
+    };
 
+    const docClient = new AWS.DynamoDB.DocumentClient(this.dynamoConfig);
+    try {
+      let data = await docClient.get(params).promise();
       if (!_.isEmpty(data)) {
         return Promise.resolve(true);
       } else {
@@ -476,13 +481,13 @@ class Command {
     }
   }
 
-
   /**
    * Retrieves device registration information for the user.
    * @param {string} deviceId - id of device to retrieve
    * @param {string} userId - id of the user to retrieve
    *
    * TODO: Catch exceptions/promise rejections
+   * FIXME: I think something is wrong here.
    */
   async _getUserDeviceRegistration(deviceId, userId) {
     let params = {
