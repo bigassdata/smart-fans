@@ -178,7 +178,7 @@ class Command {
       // the command based on the type of the device.
       let validRegistration = await this._validateUserDeviceRegistration(
         deviceId,
-        ticket.subs
+        ticket.sub
       );
 
       if (validRegistration) {
