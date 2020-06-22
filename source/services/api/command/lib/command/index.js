@@ -65,7 +65,7 @@ class Command {
       } else {
         Logger.error(
           Logger.levels.INFO,
-          `[MissingRegistration] No registration found for device ${deviceId}.`
+          `[MissingRegistration] No registration found for device ${deviceId} and userid.`
         );
         return Promise.reject({
           code: 400,
@@ -74,6 +74,10 @@ class Command {
         });
       }
     } catch (err) {
+      Logger.error(
+        Logger.levels.INFO,
+        `Error getting command.  Ticket is ${JSON.stringify(ticket)}`
+      );
       return Promise.reject(err);
     }
   }
