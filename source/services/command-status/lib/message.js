@@ -81,6 +81,7 @@ class Message {
       return Promise.resolve(_event);
     } catch (err) {
       Logger.error(Logger.levels.INFO, err);
+      Logger.error(Logger.levels.INFO, `Params: ${JSON.stringify(params)}`);
       return Promise.reject({
         code: 500,
         error: 'StatusUpdateFailure',
